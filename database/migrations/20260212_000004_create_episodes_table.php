@@ -17,14 +17,12 @@ return new class extends Migration
             $table->string('episode_title', 255)->nullable();
             $table->date('onair_date')->nullable();
             $table->unsignedSmallInteger('duration_min');  // 分（1以上はバリデーションで担保）
-            $table->unsignedInteger('is_movie')->default(0);
 
             $table->timestamps();
 
             // 同一シリーズ内で話数重複禁止
             $table->unique(['series_id', 'episode_no']);
             $table->index(['series_id', 'episode_no']);
-            $table->index('is_movie');
         });
     }
 
