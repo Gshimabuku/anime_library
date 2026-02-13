@@ -16,11 +16,9 @@ return new class extends Migration
             $table->string('name', 255); // 例: 幼少編
             $table->unsignedInteger('start_episode_no');
             $table->unsignedInteger('end_episode_no');
-            $table->unsignedInteger('arc_order')->default(1);
 
             $table->timestamps();
 
-            $table->index(['series_id', 'arc_order']);
             $table->index(['series_id', 'start_episode_no', 'end_episode_no']);
         });
     }
