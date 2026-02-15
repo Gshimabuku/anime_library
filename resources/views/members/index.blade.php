@@ -62,8 +62,6 @@
     </div>
 
     @if($members->hasPages())
-        <div style="margin-top:20px;text-align:center;">
-            {{ $members->appends(request()->query())->links() }}
-        </div>
+        @include('components.pagination', ['paginator' => $members->appends(request()->query())])
     @endif
 @endsection

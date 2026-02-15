@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             PlatformSeeder::class,
             SeriesPlatformAvailabilitySeeder::class,
             MemberSeriesStatusSeeder::class,
+            ArcSeeder::class,
         ];
 
         // seeder実行

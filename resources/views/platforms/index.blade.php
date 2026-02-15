@@ -63,8 +63,6 @@
     </div>
 
     @if($platforms->hasPages())
-        <div style="margin-top:20px;text-align:center;">
-            {{ $platforms->appends(request()->query())->links() }}
-        </div>
+        @include('components.pagination', ['paginator' => $platforms->appends(request()->query())])
     @endif
 @endsection

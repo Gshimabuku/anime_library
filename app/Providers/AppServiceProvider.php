@@ -9,6 +9,8 @@ use App\Services\Impl\DashboardServiceImpl;
 use App\Services\Impl\MemberServiceImpl;
 use App\Services\Impl\PlatformServiceImpl;
 use App\Services\MemberService;
+use App\Services\EpisodeService;
+use App\Services\Impl\EpisodeServiceImpl;
 use App\Services\PlatformService;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,6 +25,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MemberService::class, MemberServiceImpl::class);
         $this->app->bind(AnimeTitleService::class, AnimeTitleServiceImpl::class);
         $this->app->bind(PlatformService::class, PlatformServiceImpl::class);
+        $this->app->bind(EpisodeService::class, EpisodeServiceImpl::class);
     }
 
     /**

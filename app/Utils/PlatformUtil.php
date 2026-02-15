@@ -12,12 +12,21 @@ class PlatformUtil
 {
     /**
      * プラットフォームに紐づく作品数を取得する
+     * 全シリーズが配信されている作品のみカウントする
      */
     public static function getAnimeTitleCount(Platform $platform): int
     {
-        return AnimeTitle::whereHas('series.seriesPlatformAvailabilities', function ($q) use ($platform) {
-            $q->where('platform_id', $platform->id);
-        })->count();
+        return AnimeTitle::where(function ($query) use ($platform) {
+            $query->whereRaw(
+                '(SELECT COUNT(DISTINCT s.id) FROM series s WHERE s.anime_title_id = anime_titles.id) = '
+                . '(SELECT COUNT(DISTINCT spa.series_id) FROM series_platform_availabilities spa '
+                . 'INNER JOIN series s2 ON s2.id = spa.series_id '
+                . 'WHERE s2.anime_title_id = anime_titles.id AND spa.platform_id = ?)',
+                [$platform->id]
+            );
+        })
+        ->whereHas('series') // シリーズが0件の作品を除外
+        ->count();
     }
 
     /**

@@ -7,6 +7,7 @@ use App\Http\Requests\AnimeTitle\StoreAnimeTitleRequest;
 use App\Http\Requests\AnimeTitle\UpdateAnimeTitleRequest;
 use App\Models\AnimeTitle;
 use App\Services\AnimeTitleService;
+use Illuminate\Http\Request;
 
 class AnimeTitleController extends Controller
 {
@@ -32,13 +33,11 @@ class AnimeTitleController extends Controller
 
     public function create()
     {
+        $animeTitle = new AnimeTitle();
+        $animeTitle->setRelation('series', collect());
         $platforms = $this->animeTitleService->getActivePlatforms();
 
-        return view('works.form', [
-            'animeTitle' => new AnimeTitle(),
-            'platforms' => $platforms,
-            'selectedPlatforms' => [],
-        ]);
+        return view('works.form', compact('animeTitle', 'platforms'));
     }
 
     public function store(StoreAnimeTitleRequest $request)
@@ -46,7 +45,6 @@ class AnimeTitleController extends Controller
         $this->animeTitleService->createAnimeTitle(
             $request->validated(),
             $request->file('image'),
-            $request->getPlatformIds()
         );
 
         return redirect()->route('works.index')
@@ -59,7 +57,7 @@ class AnimeTitleController extends Controller
         $animeTitle->load(['series.arcs', 'series.seriesPlatformAvailabilities']);
         $platforms = $this->animeTitleService->getActivePlatforms();
 
-        return view('works.edit', compact('animeTitle', 'platforms'));
+        return view('works.form', compact('animeTitle', 'platforms'));
     }
 
     public function update(UpdateAnimeTitleRequest $request, AnimeTitle $animeTitle)
@@ -80,6 +78,51 @@ class AnimeTitleController extends Controller
 
         return redirect()->route('works.index')
             ->with('success', '作品を削除しました。');
+    }
+
+    public function csvImport(Request $request)
+    {
+        $request->validate([
+            'titles' => 'required|array|min:1',
+            'titles.*.title' => 'required|string|max:255',
+            'titles.*.title_kana' => 'nullable|string|max:255',
+        ]);
+
+        try {
+            $count = $this->animeTitleService->importFromCsv($request->input('titles'));
+            return response()->json([
+                'success' => true,
+                'message' => "{$count} 件の作品をインポートしました。",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    public function seriesCsvImport(Request $request, AnimeTitle $animeTitle)
+    {
+        $request->validate([
+            'series' => 'required|array|min:1',
+            'series.*.name' => 'required|string|max:255',
+            'series.*.format_type' => 'required|string',
+            'series.*.episodes' => 'required|array|min:1',
+        ]);
+
+        try {
+            $count = $this->animeTitleService->importSeriesFromCsv($animeTitle, $request->input('series'));
+            return response()->json([
+                'success' => true,
+                'message' => "{$count} 件のシリーズをインポートしました。",
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
     }
 
     public function watchStatus(AnimeTitle $animeTitle)

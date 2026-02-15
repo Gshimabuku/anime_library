@@ -532,7 +532,7 @@ textarea.form-control {
 
 .episode-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 10px;
     max-height: 2000px;
     overflow: hidden;
@@ -1013,6 +1013,12 @@ textarea.form-control {
     margin: 0;
 }
 
+.subsection-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 /* PF編集行 */
 .platform-edit-row {
     display: flex;
@@ -1275,4 +1281,293 @@ textarea.form-control {
     .search-form-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ============================
+   CSVインポート
+   ============================ */
+.csv-import-info {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.csv-import-target {
+    font-size: 1rem;
+    color: #333;
+    margin: 0;
+}
+
+.csv-import-form {
+    margin-top: 20px;
+}
+
+.csv-import-guide {
+    margin-top: 25px;
+    padding: 20px;
+    background: #f0f7ff;
+    border: 1px solid #d0e3f7;
+    border-radius: 8px;
+}
+
+.csv-guide-title {
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.csv-import-guide p {
+    margin: 5px 0;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.csv-import-guide code {
+    background: #e8e8e8;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.9rem;
+}
+
+.csv-examples {
+    margin-top: 15px;
+}
+
+.csv-examples h4 {
+    font-size: 0.95rem;
+    color: #2c3e50;
+    margin: 15px 0 5px;
+}
+
+.csv-example-code {
+    background: #2c3e50;
+    color: #ecf0f1;
+    padding: 12px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    white-space: pre;
+}
+
+.csv-preview-area {
+    margin-top: 25px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.csv-preview-count {
+    margin-top: 10px;
+    color: #28a745;
+    font-weight: 600;
+}
+
+.form-input-file {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.form-input-file:hover {
+    border-color: #3498db;
+}
+
+.form-error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+.form-actions {
+    margin-top: 25px;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-csv-import {
+    display: inline-block;
+    background: #17a2b8;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.btn-csv-import:hover {
+    background: #138496;
+    text-decoration: none;
+    color: #fff;
+}
+
+.episode-empty {
+    padding: 15px;
+    text-align: center;
+    color: #999;
+}
+
+.episode-empty p {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+/* ============================
+   CSVインポートモーダル
+   ============================ */
+.csv-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.csv-modal {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    width: 90%;
+    max-width: 700px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.csv-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.csv-modal-header h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #2c3e50;
+}
+
+.csv-modal-body {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.csv-modal-footer {
+    padding: 16px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* ========================================
+   ページネーション
+======================================== */
+.pagination-wrapper {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pagination-btn {
+    display: inline-block;
+    padding: 6px 14px;
+    font-size: 14px;
+    color: #4a90d9;
+    text-decoration: none;
+    border: 1px solid #d0d5dd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.pagination-btn:hover {
+    background: #4a90d9;
+    color: #fff;
+}
+
+.pagination-btn-disabled {
+    color: #aab2bd;
+    border-color: #e5e7eb;
+    background: #f5f5f5;
+    cursor: default;
+    pointer-events: none;
+}
+
+.pagination-select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border: 1px solid #d0d5dd;
+    border-radius: 4px;
+    background: #fff;
+    cursor: pointer;
+    min-width: 60px;
+    text-align: center;
+}
+
+.pagination-select:focus {
+    outline: none;
+    border-color: #4a90d9;
+    box-shadow: 0 0 0 2px rgba(74, 144, 217, 0.2);
+}
+
+.pagination-info {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #888;
+}
+
+/* ========================================
+   一覧サムネイル画像
+======================================== */
+.th-image {
+    width: 60px;
+}
+
+.td-image {
+    width: 60px;
+    padding: 4px 8px !important;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.list-thumbnail {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.list-thumbnail-placeholder {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eee;
+    border-radius: 4px;
+    font-size: 9px;
+    color: #aaa;
 }

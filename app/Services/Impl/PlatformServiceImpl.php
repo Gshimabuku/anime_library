@@ -30,7 +30,7 @@ class PlatformServiceImpl implements PlatformService
             ))
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate(50);
     }
 
     /**

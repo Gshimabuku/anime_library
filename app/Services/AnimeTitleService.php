@@ -30,9 +30,9 @@ interface AnimeTitleService
     public function getSelectedPlatformIds(AnimeTitle $animeTitle): array;
 
     /**
-     * 作品を新規作成する
+     * 作品を新規作成する（シリーズ・エピソード・アーク含む）
      */
-    public function createAnimeTitle(array $data, ?UploadedFile $image, array $platformIds): AnimeTitle;
+    public function createAnimeTitle(array $data, ?UploadedFile $image): AnimeTitle;
 
     /**
      * 作品情報を更新する（シリーズ・エピソード・アーク含む）
@@ -43,4 +43,14 @@ interface AnimeTitleService
      * 作品を削除する
      */
     public function deleteAnimeTitle(AnimeTitle $animeTitle): void;
+
+    /**
+     * CSVデータから作品を一括インポートする
+     */
+    public function importFromCsv(array $titlesData): int;
+
+    /**
+     * CSVデータからシリーズとエピソードを一括インポートする
+     */
+    public function importSeriesFromCsv(AnimeTitle $animeTitle, array $seriesData): int;
 }

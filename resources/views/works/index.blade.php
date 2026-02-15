@@ -99,7 +99,7 @@
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th class="th-image"></th>
                     <th>作品名</th>
                     <th>シリーズ数</th>
                     <th>話数</th>
@@ -111,7 +111,20 @@
             <tbody>
                 @forelse($titles as $title)
                     <tr class="clickable-row" onclick="location.href='{{ route('works.show', $title) }}'">
-                        <td>W{{ str_pad($title->id, 3, '0', STR_PAD_LEFT) }}</td>
+                        <td class="td-image">
+                            @php
+                                $imageUrl = $title->image_url;
+                                if (!$imageUrl) {
+                                    $imagePath = 'images/works/works_' . str_pad($title->id, 3, '0', STR_PAD_LEFT) . '.jpg';
+                                    $imageUrl = file_exists(public_path($imagePath)) ? asset($imagePath) : null;
+                                }
+                            @endphp
+                            @if($imageUrl)
+                                <img src="{{ $imageUrl }}" alt="{{ $title->title }}" class="list-thumbnail">
+                            @else
+                                <div class="list-thumbnail-placeholder">No Image</div>
+                            @endif
+                        </td>
                         <td>{{ $title->title }}</td>
                         <td>
                             @php
@@ -169,8 +182,6 @@
     </div>
 
     @if($titles->hasPages())
-        <div style="margin-top:20px;text-align:center;">
-            {{ $titles->appends(request()->query())->links() }}
-        </div>
+        @include('components.pagination', ['paginator' => $titles->appends(request()->query())])
     @endif
 @endsection

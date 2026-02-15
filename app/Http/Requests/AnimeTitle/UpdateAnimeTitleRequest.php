@@ -20,7 +20,6 @@ class UpdateAnimeTitleRequest extends FormRequest
             // 作品基本情報
             'title' => 'required|string|max:255',
             'title_kana' => 'nullable|string|max:255',
-            'work_type' => 'required|in:' . implode(',', WorkType::values()),
             'image' => 'nullable|image|max:5120',
 
             // シリーズ

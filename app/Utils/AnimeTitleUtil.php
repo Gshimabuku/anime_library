@@ -105,21 +105,37 @@ class AnimeTitleUtil
 
     /**
      * 作品に紐づくプラットフォーム一覧を取得する
+     * 全シリーズ（シリーズ、スペシャル、映画）が配信されているプラットフォームのみ返す
      */
     public static function getPlatforms(AnimeTitle $animeTitle)
     {
-        return Platform::whereHas('seriesPlatformAvailabilities', function ($q) use ($animeTitle) {
-            $q->whereIn('series_id', $animeTitle->series()->pluck('id'));
-        })->orderBy('sort_order')->get()->unique('id');
+        $seriesIds = $animeTitle->series()->pluck('id');
+        $seriesCount = $seriesIds->count();
+
+        if ($seriesCount === 0) {
+            return collect();
+        }
+
+        return Platform::select('platforms.*')
+            ->join('series_platform_availabilities', 'platforms.id', '=', 'series_platform_availabilities.platform_id')
+            ->whereIn('series_platform_availabilities.series_id', $seriesIds)
+            ->groupBy('platforms.id', 'platforms.name', 'platforms.sort_order', 'platforms.is_active', 'platforms.created_at', 'platforms.updated_at')
+            ->havingRaw('COUNT(DISTINCT series_platform_availabilities.series_id) = ?', [$seriesCount])
+            ->orderBy('platforms.sort_order')
+            ->get();
     }
 
     /**
      * ポイント必要なプラットフォームIDを取得する
+     * 全シリーズ配信プラットフォームのうち、ポイント必要なもののみ返す
      */
     public static function getPointRequiredPlatformIds(AnimeTitle $animeTitle): array
     {
+        $allSeriesPlatformIds = self::getPlatforms($animeTitle)->pluck('id');
+
         return SeriesPlatformAvailability::query()
             ->whereIn('series_id', $animeTitle->series()->select('id'))
+            ->whereIn('platform_id', $allSeriesPlatformIds)
             ->whereIn('watch_condition', [
                 WatchCondition::POINT_PURCHASE->value,
                 WatchCondition::POINT_RENTAL->value,

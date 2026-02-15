@@ -39,7 +39,7 @@ class MemberServiceImpl implements MemberService
             ))
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate(50);
     }
 
     /**

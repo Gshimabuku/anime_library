@@ -97,7 +97,7 @@ class AnimeTitleServiceImpl implements AnimeTitleService
                 });
             })
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate(50);
     }
 
     /**
@@ -142,27 +142,33 @@ class AnimeTitleServiceImpl implements AnimeTitleService
     /**
      * {@inheritdoc}
      */
-    public function createAnimeTitle(array $data, ?UploadedFile $image, array $platformIds): AnimeTitle
+    public function createAnimeTitle(array $data, ?UploadedFile $image): AnimeTitle
     {
         $data['image_url'] = CloudinaryUtil::uploadImage($image);
 
-        return DB::transaction(function () use ($data, $platformIds) {
+        // シリーズのフォーマットタイプから作品タイプを自動決定
+        $data['work_type'] = $this->determineWorkType($data['series'] ?? []);
+
+        return DB::transaction(function () use ($data) {
             $animeTitle = AnimeTitle::create($data);
 
-            $series = $animeTitle->series()->create([
-                'name' => 'シーズン1',
-                'series_order' => 1,
-                'format_type' => $data['work_type'] == WorkType::MOVIE_ONLY->value
-                    ? SeriesFormatType::MOVIE->value
-                    : SeriesFormatType::SERIES->value,
-            ]);
-
-            foreach ($platformIds as $platformId) {
-                SeriesPlatformAvailability::create([
-                    'series_id' => $series->id,
-                    'platform_id' => $platformId,
-                    'watch_condition' => WatchCondition::SUBSCRIPTION->value,
+            // シリーズの作成
+            $seriesDataList = $data['series'] ?? [];
+            foreach ($seriesDataList as $seriesData) {
+                $series = $animeTitle->series()->create([
+                    'name' => $seriesData['name'],
+                    'format_type' => $seriesData['format_type'],
+                    'series_order' => $seriesData['series_order'],
                 ]);
+
+                // 配信PFの作成
+                $this->syncSeriesPlatforms($series->id, $seriesData['platforms'] ?? []);
+
+                // エピソードの作成
+                $this->syncSeriesEpisodes($series->id, $seriesData['episodes'] ?? []);
+
+                // アークの作成
+                $this->syncSeriesArcs($series->id, $seriesData['arcs'] ?? []);
             }
 
             return $animeTitle;
@@ -184,7 +190,6 @@ class AnimeTitleServiceImpl implements AnimeTitleService
             $animeTitle->update([
                 'title' => $data['title'],
                 'title_kana' => $data['title_kana'] ?? null,
-                'work_type' => $data['work_type'],
                 'image_url' => $data['image_url'] ?? $animeTitle->image_url,
             ]);
 
@@ -239,6 +244,12 @@ class AnimeTitleServiceImpl implements AnimeTitleService
                 // アークの作成・更新
                 $this->syncSeriesArcs($seriesId, $seriesData['arcs'] ?? []);
             }
+
+            // シリーズのフォーマットタイプから作品タイプを自動再決定
+            $animeTitle->refresh();
+            $animeTitle->load('series');
+            $seriesForUpdate = $animeTitle->series->map(fn($s) => ['format_type' => $s->format_type])->toArray();
+            $animeTitle->update(['work_type' => $this->determineWorkType($seriesForUpdate)]);
         });
 
         return $animeTitle;
@@ -316,8 +327,120 @@ class AnimeTitleServiceImpl implements AnimeTitleService
     /**
      * {@inheritdoc}
      */
+    /**
+     * シリーズのフォーマットタイプから作品タイプを自動決定する
+     */
+    private function determineWorkType(array $seriesDataList): int
+    {
+        if (empty($seriesDataList)) {
+            return WorkType::SERIES_ONLY->value;
+        }
+
+        $hasMovie = false;
+        $hasNonMovie = false;
+
+        foreach ($seriesDataList as $seriesData) {
+            $formatType = (int) ($seriesData['format_type'] ?? SeriesFormatType::SERIES->value);
+            if ($formatType === SeriesFormatType::MOVIE->value) {
+                $hasMovie = true;
+            } else {
+                $hasNonMovie = true;
+            }
+        }
+
+        if ($hasMovie && $hasNonMovie) {
+            return WorkType::SERIES_PLUS_MOVIE->value;
+        }
+        if ($hasMovie && !$hasNonMovie) {
+            return WorkType::MOVIE_ONLY->value;
+        }
+
+        return WorkType::SERIES_ONLY->value;
+    }
+
     public function deleteAnimeTitle(AnimeTitle $animeTitle): void
     {
         $animeTitle->delete();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function importFromCsv(array $titlesData): int
+    {
+        return DB::transaction(function () use ($titlesData) {
+            $count = 0;
+            foreach ($titlesData as $titleData) {
+                AnimeTitle::create([
+                    'title' => $titleData['title'],
+                    'title_kana' => $titleData['title_kana'] ?? null,
+                    'work_type' => WorkType::SERIES_ONLY->value,
+                ]);
+                $count++;
+            }
+            return $count;
+        });
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function importSeriesFromCsv(AnimeTitle $animeTitle, array $seriesDataList): int
+    {
+        return DB::transaction(function () use ($animeTitle, $seriesDataList) {
+            $currentMaxOrder = $animeTitle->series()->max('series_order') ?? 0;
+            $count = 0;
+
+            foreach ($seriesDataList as $seriesData) {
+                $currentMaxOrder++;
+                $formatValue = $this->resolveFormatType($seriesData['format_type']);
+
+                $series = $animeTitle->series()->create([
+                    'name' => $seriesData['name'],
+                    'format_type' => $formatValue,
+                    'series_order' => $currentMaxOrder,
+                ]);
+
+                foreach ($seriesData['episodes'] as $index => $epData) {
+                    Episode::create([
+                        'series_id' => $series->id,
+                        'episode_no' => $epData['episode_no'] ?? ($index + 1),
+                        'episode_title' => $epData['episode_title'] ?? null,
+                        'onair_date' => $epData['onair_date'] ?? null,
+                        'duration_min' => $epData['duration_min'] ?? null,
+                    ]);
+                }
+
+                $count++;
+            }
+
+            // 作品タイプを再決定
+            $animeTitle->refresh();
+            $animeTitle->load('series');
+            $seriesForUpdate = $animeTitle->series->map(fn($s) => ['format_type' => $s->format_type])->toArray();
+            $animeTitle->update(['work_type' => $this->determineWorkType($seriesForUpdate)]);
+
+            return $count;
+        });
+    }
+
+    /**
+     * フォーマットタイプのラベルまたは値から enum 値を解決する
+     */
+    private function resolveFormatType(string $formatType): int
+    {
+        // 数値ならそのまま
+        if (is_numeric($formatType)) {
+            return (int) $formatType;
+        }
+
+        // ラベル名からマッチ
+        foreach (SeriesFormatType::cases() as $case) {
+            if ($case->label() === $formatType) {
+                return $case->value;
+            }
+        }
+
+        return SeriesFormatType::SERIES->value;
     }
 }

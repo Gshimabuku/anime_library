@@ -198,6 +198,9 @@ function addEpisode(btn, seriesIndex) {
 
     const newRow = list.querySelector('.episode-edit-row:last-child');
     attachEpisodeDragEvents(newRow, list);
+
+    // CSVインポートボタンを非表示
+    updateCsvImportBtnVisibility(btn.closest('.subsection'));
 }
 
 // ========================================
@@ -223,6 +226,9 @@ function removeEpisode(btn) {
         const header = list.querySelector('.episode-edit-header-row');
         if (header) header.remove();
     }
+
+    // CSVインポートボタンの表示切り替え
+    updateCsvImportBtnVisibility(list.closest('.subsection'));
 }
 
 // ========================================
@@ -429,4 +435,18 @@ function toggleEditSeries(icon) {
     } else {
         icon.textContent = '▼';
     }
+}
+
+// ========================================
+// CSVインポートボタンの表示制御
+// ========================================
+function updateCsvImportBtnVisibility(subsection) {
+    if (!subsection) return;
+    const csvBtn = subsection.querySelector('.csv-import-episode-btn');
+    if (!csvBtn) return;
+
+    const list = subsection.querySelector('.episode-edit-list');
+    const episodeCount = list ? list.querySelectorAll('.episode-edit-row').length : 0;
+
+    csvBtn.style.display = episodeCount === 0 ? '' : 'none';
 }
