@@ -16,6 +16,7 @@ Route::get('/watch-status', [WatchStatusController::class, 'index'])->name('watc
 // メンバー管理
 Route::resource('members', MemberController::class);
 Route::get('members/{member}/watch-status', [MemberController::class, 'watchStatus'])->name('members.watch-status');
+Route::patch('members/{member}/watch-status', [MemberController::class, 'updateWatchStatus'])->name('members.watch-status.update');
 
 // 作品管理
 Route::resource('works', AnimeTitleController::class)->parameters([

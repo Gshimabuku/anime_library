@@ -16,12 +16,11 @@ class AnimeTitleController extends Controller
 
     public function index(IndexAnimeTitleRequest $request)
     {
-        $keyword = $request->getKeyword();
-        $workTypes = $request->getWorkTypes();
+        $searchParams = $request->getSearchParams();
+        $titles = $this->animeTitleService->getAnimeTitles($searchParams);
+        $platforms = $this->animeTitleService->getActivePlatforms();
 
-        $titles = $this->animeTitleService->getAnimeTitles($keyword, $workTypes);
-
-        return view('works.index', compact('titles', 'keyword', 'workTypes'));
+        return view('works.index', compact('titles', 'searchParams', 'platforms'));
     }
 
     public function show(AnimeTitle $animeTitle)

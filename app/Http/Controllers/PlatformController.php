@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Platform\IndexPlatformRequest;
 use App\Http\Requests\Platform\StorePlatformRequest;
 use App\Http\Requests\Platform\UpdatePlatformRequest;
 use App\Models\Platform;
 use App\Services\PlatformService;
-use Illuminate\Http\Request;
 
 class PlatformController extends Controller
 {
@@ -14,12 +14,12 @@ class PlatformController extends Controller
         private readonly PlatformService $platformService
     ) {}
 
-    public function index(Request $request)
+    public function index(IndexPlatformRequest $request)
     {
-        $keyword = $request->input('keyword');
-        $platforms = $this->platformService->getPlatforms($keyword);
+        $searchParams = $request->getSearchParams();
+        $platforms = $this->platformService->getPlatforms($searchParams);
 
-        return view('platforms.index', compact('platforms', 'keyword'));
+        return view('platforms.index', compact('platforms', 'searchParams'));
     }
 
     public function show(Platform $platform)

@@ -32,7 +32,7 @@ class Platform extends Model
     public function series(): BelongsToMany
     {
         return $this->belongsToMany(Series::class, 'series_platform_availabilities')
-                     ->withPivot('watch_condition', 'note')
+                     ->withPivot('watch_condition')
                      ->withTimestamps();
     }
 }

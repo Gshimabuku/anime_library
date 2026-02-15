@@ -11,6 +11,33 @@
 
     <h1 class="page-title">視聴状況一覧</h1>
 
+    <!-- 検索パネル -->
+    <x-search-panel>
+        <form method="GET" action="{{ route('watch-status.index') }}" id="searchForm">
+            <div class="search-form-grid">
+                <div class="search-field">
+                    <label class="search-field-label">作品名</label>
+                    <input type="text" name="keyword" class="form-control form-control-sm" value="{{ $searchParams['keyword'] ?? '' }}" placeholder="部分一致">
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">視聴状況</label>
+                    <div class="search-checkbox-group">
+                        @foreach(WatchStatus::cases() as $status)
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="watch_statuses[]" value="{{ $status->value }}" {{ in_array($status->value, array_map('intval', $searchParams['watch_statuses'] ?? [])) ? 'checked' : '' }}>
+                                {{ $status->label() }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div class="search-actions">
+                <button type="submit" class="btn btn-primary btn-sm">検索</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="resetSearch('{{ route('watch-status.index') }}')">リセット</button>
+            </div>
+        </form>
+    </x-search-panel>
+
     <div class="list-container">
         {{-- 凡例 --}}
         <div style="display: flex; gap: 30px; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; justify-content: center;">

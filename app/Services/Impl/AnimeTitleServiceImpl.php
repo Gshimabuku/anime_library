@@ -22,11 +22,80 @@ class AnimeTitleServiceImpl implements AnimeTitleService
     /**
      * {@inheritdoc}
      */
-    public function getAnimeTitles(?string $keyword, ?array $workTypes): LengthAwarePaginator
+    public function getAnimeTitles(array $searchParams): LengthAwarePaginator
     {
+        $keyword = $searchParams['keyword'] ?? null;
+        $workTypes = $searchParams['work_types'] ?? null;
+        $seriesCountMin = $searchParams['series_count_min'] ?? null;
+        $seriesCountMax = $searchParams['series_count_max'] ?? null;
+        $specialCountMin = $searchParams['special_count_min'] ?? null;
+        $specialCountMax = $searchParams['special_count_max'] ?? null;
+        $movieCountMin = $searchParams['movie_count_min'] ?? null;
+        $movieCountMax = $searchParams['movie_count_max'] ?? null;
+        $episodeCountMin = $searchParams['episode_count_min'] ?? null;
+        $episodeCountMax = $searchParams['episode_count_max'] ?? null;
+        $durationMin = $searchParams['duration_min'] ?? null;
+        $durationMax = $searchParams['duration_max'] ?? null;
+        $platformIds = $searchParams['platform_ids'] ?? [];
+
         return AnimeTitle::query()
             ->when($keyword, fn ($q) => $q->where('title', 'like', "%{$keyword}%"))
             ->when($workTypes && count($workTypes) > 0, fn ($q) => $q->whereIn('work_type', $workTypes))
+            // シリーズ数フィルタ
+            ->when($seriesCountMin !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) >= ?',
+                [SeriesFormatType::SERIES->value, $seriesCountMin]
+            ))
+            ->when($seriesCountMax !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) <= ?',
+                [SeriesFormatType::SERIES->value, $seriesCountMax]
+            ))
+            // スペシャル数フィルタ
+            ->when($specialCountMin !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) >= ?',
+                [SeriesFormatType::SPECIAL->value, $specialCountMin]
+            ))
+            ->when($specialCountMax !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) <= ?',
+                [SeriesFormatType::SPECIAL->value, $specialCountMax]
+            ))
+            // 映画数フィルタ
+            ->when($movieCountMin !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) >= ?',
+                [SeriesFormatType::MOVIE->value, $movieCountMin]
+            ))
+            ->when($movieCountMax !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM series WHERE series.anime_title_id = anime_titles.id AND series.format_type = ?) <= ?',
+                [SeriesFormatType::MOVIE->value, $movieCountMax]
+            ))
+            // 話数フィルタ（映画除外）
+            ->when($episodeCountMin !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM episodes JOIN series ON episodes.series_id = series.id WHERE series.anime_title_id = anime_titles.id AND series.format_type != ?) >= ?',
+                [SeriesFormatType::MOVIE->value, $episodeCountMin]
+            ))
+            ->when($episodeCountMax !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COUNT(*) FROM episodes JOIN series ON episodes.series_id = series.id WHERE series.anime_title_id = anime_titles.id AND series.format_type != ?) <= ?',
+                [SeriesFormatType::MOVIE->value, $episodeCountMax]
+            ))
+            // 総視聴時間フィルタ（分）
+            ->when($durationMin !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COALESCE(SUM(episodes.duration_min), 0) FROM episodes JOIN series ON episodes.series_id = series.id WHERE series.anime_title_id = anime_titles.id) >= ?',
+                [$durationMin]
+            ))
+            ->when($durationMax !== null, fn ($q) => $q->whereRaw(
+                '(SELECT COALESCE(SUM(episodes.duration_min), 0) FROM episodes JOIN series ON episodes.series_id = series.id WHERE series.anime_title_id = anime_titles.id) <= ?',
+                [$durationMax]
+            ))
+            // 配信プラットフォームフィルタ
+            ->when(!empty($platformIds), function ($q) use ($platformIds) {
+                $q->whereExists(function ($subquery) use ($platformIds) {
+                    $subquery->select(DB::raw(1))
+                        ->from('series')
+                        ->join('series_platform_availabilities', 'series.id', '=', 'series_platform_availabilities.series_id')
+                        ->whereColumn('series.anime_title_id', 'anime_titles.id')
+                        ->whereIn('series_platform_availabilities.platform_id', $platformIds);
+                });
+            })
             ->orderBy('id')
             ->paginate(20);
     }

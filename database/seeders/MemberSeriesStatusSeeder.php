@@ -27,7 +27,6 @@ class MemberSeriesStatusSeeder extends BaseDatabaseSeeder
             'member_id',
             'series_id',
             'status',
-            'completed_at',
         ];
         return $ret;
     }

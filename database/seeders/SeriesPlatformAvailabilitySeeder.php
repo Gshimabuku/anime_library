@@ -27,7 +27,6 @@ class SeriesPlatformAvailabilitySeeder extends BaseDatabaseSeeder
             'series_id',
             'platform_id',
             'watch_condition',
-            'note',
         ];
         return $ret;
     }

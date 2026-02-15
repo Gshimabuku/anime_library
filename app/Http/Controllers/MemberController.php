@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Member\IndexMemberRequest;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
 use App\Models\Member;
+use App\Enums\WatchStatus;
 use App\Services\MemberService;
-use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
@@ -14,12 +15,12 @@ class MemberController extends Controller
         private readonly MemberService $memberService
     ) {}
 
-    public function index(Request $request)
+    public function index(IndexMemberRequest $request)
     {
-        $keyword = $request->input('keyword');
-        $members = $this->memberService->getMembers($keyword);
+        $searchParams = $request->getSearchParams();
+        $members = $this->memberService->getMembers($searchParams);
 
-        return view('members.index', compact('members', 'keyword'));
+        return view('members.index', compact('members', 'searchParams'));
     }
 
     public function show(Member $member)
@@ -51,6 +52,30 @@ class MemberController extends Controller
             ->groupBy('series_id');
 
         return view('members.watch-status', compact('member', 'animeTitles', 'watchStatuses'));
+    }
+
+    public function updateWatchStatus(\Illuminate\Http\Request $request, Member $member)
+    {
+        $request->validate([
+            'series_id' => 'required|integer|exists:series,id',
+            'status' => 'required|integer|in:' . implode(',', WatchStatus::values()),
+        ]);
+
+        $result = $this->memberService->updateMemberSeriesStatus(
+            $member,
+            $request->input('series_id'),
+            $request->input('status')
+        );
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'status' => $result->status,
+            ]);
+        }
+
+        return redirect()->route('members.watch-status', $member)
+            ->with('success', '視聴状況を更新しました。');
     }
 
     public function create()

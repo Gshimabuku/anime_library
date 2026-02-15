@@ -10,7 +10,7 @@ interface PlatformService
     /**
      * プラットフォーム一覧を取得する（検索・ページネーション付き）
      */
-    public function getPlatforms(?string $keyword): LengthAwarePaginator;
+    public function getPlatforms(array $searchParams): LengthAwarePaginator;
 
     /**
      * プラットフォームを新規作成する

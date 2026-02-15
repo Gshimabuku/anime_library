@@ -16,15 +16,7 @@ class MemberSeriesStatus extends Model
         'member_id',
         'series_id',
         'status',
-        'completed_at',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'completed_at' => 'datetime',
-        ];
-    }
 
     public function member(): BelongsTo
     {

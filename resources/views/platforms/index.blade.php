@@ -8,12 +8,33 @@
 
     <!-- アクションバー -->
     <div class="action-bar">
-        <form method="GET" action="{{ route('platforms.index') }}" class="search-box">
-            <input type="text" name="keyword" class="search-input" placeholder="プラットフォーム名で検索..." value="{{ $keyword ?? '' }}">
-            <button type="submit" class="btn btn-secondary">検索</button>
-        </form>
+        <div></div>
         <a href="{{ route('platforms.create') }}" class="btn btn-primary">+ 新規追加</a>
     </div>
+
+    <!-- 検索パネル -->
+    <x-search-panel>
+        <form method="GET" action="{{ route('platforms.index') }}" id="searchForm">
+            <div class="search-form-grid">
+                <div class="search-field">
+                    <label class="search-field-label">プラットフォーム名</label>
+                    <input type="text" name="keyword" class="form-control form-control-sm" value="{{ $searchParams['keyword'] ?? '' }}" placeholder="部分一致">
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">配信作品数</label>
+                    <div class="search-range">
+                        <input type="number" name="title_count_min" class="form-control form-control-sm" value="{{ $searchParams['title_count_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="title_count_max" class="form-control form-control-sm" value="{{ $searchParams['title_count_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+            </div>
+            <div class="search-actions">
+                <button type="submit" class="btn btn-primary btn-sm">検索</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="resetSearch('{{ route('platforms.index') }}')">リセット</button>
+            </div>
+        </form>
+    </x-search-panel>
 
     <!-- プラットフォームテーブル -->
     <div class="table-container">
@@ -23,7 +44,6 @@
                     <th>ID</th>
                     <th>プラットフォーム名</th>
                     <th>配信作品数</th>
-                    <th>ステータス</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,17 +52,10 @@
                         <td>P{{ str_pad($platform->id, 3, '0', STR_PAD_LEFT) }}</td>
                         <td>{{ $platform->name }}</td>
                         <td>{{ PlatformUtil::getAnimeTitleCount($platform) }}作品</td>
-                        <td>
-                            @if($platform->is_active)
-                                <span class="badge badge-active">有効</span>
-                            @else
-                                <span class="badge badge-inactive">停止中</span>
-                            @endif
-                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="text-center">プラットフォームが見つかりません。</td>
+                        <td colspan="3" class="text-center">プラットフォームが見つかりません。</td>
                     </tr>
                 @endforelse
             </tbody>

@@ -18,8 +18,6 @@ return new class extends Migration
             // 1:見放題 2:ポイント購入 3:ポイントレンタル
             $table->unsignedTinyInteger('watch_condition')->default(1);
 
-            $table->string('note', 255)->nullable();
-
             $table->timestamps();
 
             $table->unique(['series_id', 'platform_id']);

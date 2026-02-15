@@ -12,23 +12,87 @@
 
     <!-- アクションバー -->
     <div class="action-bar">
-        <form method="GET" action="{{ route('works.index') }}" class="search-box">
-            <input type="text" name="keyword" class="search-input" placeholder="作品名で検索..." value="{{ $keyword ?? '' }}">
-            <div class="checkbox-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="work_types[]" value="{{ WorkType::SERIES_ONLY->value }}" {{ in_array(WorkType::SERIES_ONLY->value, $workTypes) ? 'checked' : '' }}> シリーズ作品
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="work_types[]" value="{{ WorkType::SERIES_PLUS_MOVIE->value }}" {{ in_array(WorkType::SERIES_PLUS_MOVIE->value, $workTypes) ? 'checked' : '' }}> シリーズ+映画
-                </label>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="work_types[]" value="{{ WorkType::MOVIE_ONLY->value }}" {{ in_array(WorkType::MOVIE_ONLY->value, $workTypes) ? 'checked' : '' }}> 映画
-                </label>
-            </div>
-            <button type="submit" class="btn btn-secondary">検索</button>
-        </form>
+        <div></div>
         <a href="{{ route('works.create') }}" class="btn btn-primary">+ 新規追加</a>
     </div>
+
+    <!-- 検索パネル -->
+    <x-search-panel>
+        <form method="GET" action="{{ route('works.index') }}" id="searchForm">
+            <div class="search-form-grid">
+                <div class="search-field">
+                    <label class="search-field-label">作品名</label>
+                    <input type="text" name="keyword" class="form-control form-control-sm" value="{{ $searchParams['keyword'] ?? '' }}" placeholder="部分一致">
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">シリーズ数</label>
+                    <div class="search-range">
+                        <input type="number" name="series_count_min" class="form-control form-control-sm" value="{{ $searchParams['series_count_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="series_count_max" class="form-control form-control-sm" value="{{ $searchParams['series_count_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">スペシャル数</label>
+                    <div class="search-range">
+                        <input type="number" name="special_count_min" class="form-control form-control-sm" value="{{ $searchParams['special_count_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="special_count_max" class="form-control form-control-sm" value="{{ $searchParams['special_count_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">映画数</label>
+                    <div class="search-range">
+                        <input type="number" name="movie_count_min" class="form-control form-control-sm" value="{{ $searchParams['movie_count_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="movie_count_max" class="form-control form-control-sm" value="{{ $searchParams['movie_count_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">話数</label>
+                    <div class="search-range">
+                        <input type="number" name="episode_count_min" class="form-control form-control-sm" value="{{ $searchParams['episode_count_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="episode_count_max" class="form-control form-control-sm" value="{{ $searchParams['episode_count_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">タイプ</label>
+                    <div class="search-checkbox-group">
+                        @foreach(WorkType::cases() as $type)
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="work_types[]" value="{{ $type->value }}" {{ in_array($type->value, $searchParams['work_types'] ?? []) ? 'checked' : '' }}>
+                                {{ $type->label() }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="search-field">
+                    <label class="search-field-label">総視聴時間（分）</label>
+                    <div class="search-range">
+                        <input type="number" name="duration_min" class="form-control form-control-sm" value="{{ $searchParams['duration_min'] ?? '' }}" placeholder="以上" min="0">
+                        <span class="search-range-separator">～</span>
+                        <input type="number" name="duration_max" class="form-control form-control-sm" value="{{ $searchParams['duration_max'] ?? '' }}" placeholder="以下" min="0">
+                    </div>
+                </div>
+                <div class="search-field search-field-full">
+                    <label class="search-field-label">配信プラットフォーム</label>
+                    <div class="search-checkbox-group">
+                        @foreach($platforms as $platform)
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="platform_ids[]" value="{{ $platform->id }}" {{ in_array($platform->id, $searchParams['platform_ids'] ?? []) ? 'checked' : '' }}>
+                                {{ $platform->name }}
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <div class="search-actions">
+                <button type="submit" class="btn btn-primary btn-sm">検索</button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="resetSearch('{{ route('works.index') }}')">リセット</button>
+            </div>
+        </form>
+    </x-search-panel>
 
     <!-- 作品テーブル -->
     <div class="table-container">
@@ -81,10 +145,10 @@
                         <td>
                             @php
                                 $pointRequiredPlatformIds = AnimeTitleUtil::getPointRequiredPlatformIds($title);
-                                $platforms = AnimeTitleUtil::getPlatforms($title);
+                                $titlePlatforms = AnimeTitleUtil::getPlatforms($title);
                             @endphp
                             <div class="platform-icons">
-                                @foreach($platforms as $platform)
+                                @foreach($titlePlatforms as $platform)
                                     @php $iconFile = PlatformUtil::getIconFile($platform->name); @endphp
                                     <span class="platform-icon-item{{ in_array($platform->id, $pointRequiredPlatformIds, true) ? ' point-required' : '' }}">
                                         @if($iconFile)

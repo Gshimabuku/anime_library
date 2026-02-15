@@ -17,7 +17,6 @@ class SeriesPlatformAvailability extends Model
         'series_id',
         'platform_id',
         'watch_condition',
-        'note',
     ];
 
     protected function casts(): array

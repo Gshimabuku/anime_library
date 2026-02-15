@@ -1176,3 +1176,103 @@ textarea.form-control {
 .work-detail {
     border-top: 1px solid #e9ecef;
 }
+
+/* ============================
+   統一検索パネル
+   ============================ */
+.search-panel {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.search-panel-toggle {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #f8f9fa;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+    transition: background-color 0.2s;
+}
+
+.search-panel-toggle:hover {
+    background: #e9ecef;
+}
+
+.search-panel-arrow {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.search-panel-body {
+    padding: 20px;
+    border-top: 1px solid #eee;
+}
+
+.search-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.search-field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.search-field-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.search-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-range input {
+    flex: 1;
+    min-width: 0;
+}
+
+.search-range-separator {
+    color: #999;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.search-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 4px 0;
+}
+
+.search-actions {
+    display: flex;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.search-field-full {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .search-form-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -27,7 +27,6 @@ class AnimeTitleSeeder extends BaseDatabaseSeeder
             'title',
             'title_kana',
             'work_type',
-            'note',
         ];
         return $ret;
     }

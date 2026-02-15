@@ -18,8 +18,6 @@ return new class extends Migration
             // 0: unwatched, 1: watching, 2: watched
             $table->unsignedTinyInteger('status')->default(0);
 
-            $table->timestamp('completed_at')->nullable();
-
             $table->timestamps();
 
             $table->unique(['member_id', 'series_id']);

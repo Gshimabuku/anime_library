@@ -12,7 +12,7 @@ interface AnimeTitleService
     /**
      * 作品一覧を取得する（検索・フィルタ・ページネーション付き）
      */
-    public function getAnimeTitles(?string $keyword, ?array $workTypes): LengthAwarePaginator;
+    public function getAnimeTitles(array $searchParams): LengthAwarePaginator;
 
     /**
      * 作品詳細を取得する（リレーション込み）

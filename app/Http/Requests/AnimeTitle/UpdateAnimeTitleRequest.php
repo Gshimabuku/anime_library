@@ -22,7 +22,6 @@ class UpdateAnimeTitleRequest extends FormRequest
             'title_kana' => 'nullable|string|max:255',
             'work_type' => 'required|in:' . implode(',', WorkType::values()),
             'image' => 'nullable|image|max:5120',
-            'note' => 'nullable|string',
 
             // シリーズ
             'series' => 'nullable|array',
@@ -68,7 +67,6 @@ class UpdateAnimeTitleRequest extends FormRequest
             'title_kana' => '作品名（かな）',
             'work_type' => '作品タイプ',
             'image' => '作品画像',
-            'note' => '備考',
             'series.*.name' => 'シリーズ名',
             'series.*.format_type' => 'フォーマット種別',
             'series.*.series_order' => 'シリーズ順序',

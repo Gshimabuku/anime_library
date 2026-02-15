@@ -19,7 +19,6 @@ class StoreAnimeTitleRequest extends FormRequest
             'title_kana' => 'nullable|string|max:255',
             'work_type' => 'required|in:' . implode(',', WorkType::values()),
             'image' => 'nullable|image|max:5120',
-            'note' => 'nullable|string',
             'platforms' => 'nullable|array',
             'platforms.*' => 'exists:platforms,id',
         ];
@@ -32,7 +31,6 @@ class StoreAnimeTitleRequest extends FormRequest
             'title_kana' => '作品名（かな）',
             'work_type' => '作品タイプ',
             'image' => '作品画像',
-            'note' => '備考',
             'platforms' => '配信プラットフォーム',
         ];
     }
