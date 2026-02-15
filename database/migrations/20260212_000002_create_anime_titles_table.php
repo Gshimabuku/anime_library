@@ -16,7 +16,7 @@ return new class extends Migration
             // 1: cour_only, 2: cour_plus_movie, 3: movie_only
             $table->unsignedTinyInteger('work_type')->default(1);
 
-            $table->text('note')->nullable();
+            $table->string('image_url', 2048)->nullable();
             $table->timestamps();
 
             $table->index('title');

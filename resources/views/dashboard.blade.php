@@ -35,6 +35,11 @@
             <a href="{{ route('works.index') }}" class="card-link">一覧を見る →</a>
         </div>
         <div class="card">
+            <h3 class="card-title">視聴状況</h3>
+            <p class="card-text">全作品とメンバーの視聴状況を確認します。</p>
+            <a href="{{ route('watch-status.index') }}" class="card-link">一覧を見る →</a>
+        </div>
+        <div class="card">
             <h3 class="card-title">配信プラットフォーム</h3>
             <p class="card-text">配信サービスの情報を管理します。</p>
             <a href="{{ route('platforms.index') }}" class="card-link">一覧を見る →</a>

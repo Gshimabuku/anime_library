@@ -27,17 +27,4 @@ class Member extends Model
     {
         return $this->hasMany(MemberSeriesStatus::class);
     }
-
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    public function scopeSearch($query, ?string $keyword)
-    {
-        if ($keyword) {
-            return $query->where('name', 'like', "%{$keyword}%");
-        }
-        return $query;
-    }
 }

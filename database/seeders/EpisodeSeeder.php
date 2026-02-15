@@ -29,7 +29,6 @@ class EpisodeSeeder extends BaseDatabaseSeeder
             'episode_title',
             'onair_date',
             'duration_min',
-            'is_movie',
         ];
         return $ret;
     }

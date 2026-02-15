@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\SeriesFormatType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,10 +21,6 @@ class Series extends Model
         'format_type',
     ];
 
-    const FORMAT_SERIES = SeriesFormatType::SERIES->value;
-    const FORMAT_SPECIAL = SeriesFormatType::SPECIAL->value;
-    const FORMAT_MOVIE = SeriesFormatType::MOVIE->value;
-
     public function animeTitle(): BelongsTo
     {
         return $this->belongsTo(AnimeTitle::class, 'anime_title_id');
@@ -38,7 +33,7 @@ class Series extends Model
 
     public function arcs(): HasMany
     {
-        return $this->hasMany(Arc::class)->orderBy('arc_order');
+        return $this->hasMany(Arc::class)->orderBy('start_episode_no');
     }
 
     public function platforms(): BelongsToMany
@@ -56,10 +51,5 @@ class Series extends Model
     public function memberStatuses(): HasMany
     {
         return $this->hasMany(MemberSeriesStatus::class);
-    }
-
-    public function isMovie(): bool
-    {
-        return $this->format_type === self::FORMAT_MOVIE;
     }
 }

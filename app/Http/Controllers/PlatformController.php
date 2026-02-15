@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Platform\StorePlatformRequest;
+use App\Http\Requests\Platform\UpdatePlatformRequest;
 use App\Models\Platform;
+use App\Services\PlatformService;
 use Illuminate\Http\Request;
 
 class PlatformController extends Controller
 {
+    public function __construct(
+        private readonly PlatformService $platformService
+    ) {}
+
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-
-        $platforms = Platform::search($keyword)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->paginate(20);
+        $platforms = $this->platformService->getPlatforms($keyword);
 
         return view('platforms.index', compact('platforms', 'keyword'));
     }
@@ -29,17 +32,9 @@ class PlatformController extends Controller
         return view('platforms.form', ['platform' => new Platform()]);
     }
 
-    public function store(Request $request)
+    public function store(StorePlatformRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:platforms,name',
-            'is_active' => 'required|boolean',
-        ]);
-
-        $maxOrder = Platform::max('sort_order') ?? 0;
-        $validated['sort_order'] = $maxOrder + 1;
-
-        Platform::create($validated);
+        $this->platformService->createPlatform($request->validated());
 
         return redirect()->route('platforms.index')
             ->with('success', 'プラットフォームを追加しました。');
@@ -50,14 +45,9 @@ class PlatformController extends Controller
         return view('platforms.form', compact('platform'));
     }
 
-    public function update(Request $request, Platform $platform)
+    public function update(UpdatePlatformRequest $request, Platform $platform)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:platforms,name,' . $platform->id,
-            'is_active' => 'required|boolean',
-        ]);
-
-        $platform->update($validated);
+        $this->platformService->updatePlatform($platform, $request->validated());
 
         return redirect()->route('platforms.show', $platform)
             ->with('success', 'プラットフォーム情報を更新しました。');
@@ -65,9 +55,8 @@ class PlatformController extends Controller
 
     public function destroy(Platform $platform)
     {
-        // 紐付きがある場合は削除不可（restrictOnDelete）
         try {
-            $platform->delete();
+            $this->platformService->deletePlatform($platform);
         } catch (\Exception $e) {
             return redirect()->route('platforms.show', $platform)
                 ->with('error', 'このプラットフォームは作品に紐付いているため削除できません。');

@@ -15,7 +15,6 @@ class Arc extends Model
         'name',
         'start_episode_no',
         'end_episode_no',
-        'arc_order',
     ];
 
     public function series(): BelongsTo

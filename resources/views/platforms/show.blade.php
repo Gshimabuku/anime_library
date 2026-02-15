@@ -3,6 +3,7 @@
 @section('title', 'プラットフォーム詳細 - アニメ管理システム')
 
 @section('content')
+    @php use App\Utils\PlatformUtil; @endphp
     <h1 class="page-title">配信プラットフォーム詳細</h1>
 
     <div class="detail-container">
@@ -39,7 +40,7 @@
         </div>
         <div class="detail-row">
             <div class="detail-label">配信作品数</div>
-            <div class="detail-value">{{ $platform->anime_title_count }}作品</div>
+            <div class="detail-value">{{ PlatformUtil::getAnimeTitleCount($platform) }}作品</div>
         </div>
     </div>
 @endsection

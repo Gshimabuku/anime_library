@@ -16,6 +16,7 @@
                     <li><a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">ホーム</a></li>
                     <li><a href="{{ route('members.index') }}" class="{{ request()->routeIs('members.*') ? 'active' : '' }}">メンバー</a></li>
                     <li><a href="{{ route('works.index') }}" class="{{ request()->routeIs('works.*') ? 'active' : '' }}">作品</a></li>
+                    <li><a href="{{ route('watch-status.index') }}" class="{{ request()->routeIs('watch-status.*') ? 'active' : '' }}">視聴状況</a></li>
                     <li><a href="{{ route('platforms.index') }}" class="{{ request()->routeIs('platforms.*') ? 'active' : '' }}">配信プラットフォーム</a></li>
                 </ul>
             </nav>

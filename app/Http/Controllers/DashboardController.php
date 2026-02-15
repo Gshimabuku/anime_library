@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AnimeTitle;
-use App\Models\Member;
-use App\Models\Platform;
+use App\Services\DashboardService;
 
 class DashboardController extends Controller
 {
+    public function __construct(
+        private readonly DashboardService $dashboardService
+    ) {}
+
     public function index()
     {
-        $memberCount = Member::count();
-        $titleCount = AnimeTitle::count();
-        $platformCount = Platform::count();
+        $statistics = $this->dashboardService->getStatistics();
 
-        return view('dashboard', compact('memberCount', 'titleCount', 'platformCount'));
+        return view('dashboard', $statistics);
     }
 }

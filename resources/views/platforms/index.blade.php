@@ -3,6 +3,7 @@
 @section('title', '配信プラットフォーム一覧 - アニメ管理システム')
 
 @section('content')
+    @php use App\Utils\PlatformUtil; @endphp
     <h1 class="page-title">配信プラットフォーム一覧</h1>
 
     <!-- アクションバー -->
@@ -30,7 +31,7 @@
                     <tr class="clickable-row" onclick="location.href='{{ route('platforms.show', $platform) }}'">
                         <td>P{{ str_pad($platform->id, 3, '0', STR_PAD_LEFT) }}</td>
                         <td>{{ $platform->name }}</td>
-                        <td>{{ $platform->anime_title_count }}作品</td>
+                        <td>{{ PlatformUtil::getAnimeTitleCount($platform) }}作品</td>
                         <td>
                             @if($platform->is_active)
                                 <span class="badge badge-active">有効</span>

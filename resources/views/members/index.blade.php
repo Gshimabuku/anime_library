@@ -21,6 +21,7 @@
                 <tr>
                     <th>ID</th>
                     <th>名前</th>
+                    <th>視聴済み作品数</th>
                     <th>アクティブ</th>
                 </tr>
             </thead>
@@ -29,6 +30,7 @@
                     <tr class="clickable-row" onclick="location.href='{{ route('members.show', $member) }}'">
                         <td>{{ str_pad($member->id, 3, '0', STR_PAD_LEFT) }}</td>
                         <td>{{ $member->name }}</td>
+                        <td class="text-center">{{ $member->watched_anime_titles_count ?? 0 }}</td>
                         <td>
                             @if($member->is_active)
                                 <span class="badge badge-active">有効</span>
@@ -39,7 +41,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="3" class="text-center">メンバーが見つかりません。</td>
+                        <td colspan="4" class="text-center">メンバーが見つかりません。</td>
                     </tr>
                 @endforelse
             </tbody>

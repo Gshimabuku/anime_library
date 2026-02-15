@@ -20,10 +20,12 @@ class SeriesPlatformAvailability extends Model
         'note',
     ];
 
-    const CONDITION_FREE = WatchCondition::SUBSCRIPTION->value;
-    const CONDITION_POINT = WatchCondition::POINT_PURCHASE->value;
-    const CONDITION_RENTAL = WatchCondition::POINT_RENTAL->value;
-    const CONDITION_UNLIMITED = WatchCondition::SUBSCRIPTION->value;
+    protected function casts(): array
+    {
+        return [
+            'watch_condition' => WatchCondition::class,
+        ];
+    }
 
     public function series(): BelongsTo
     {

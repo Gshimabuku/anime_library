@@ -2,51 +2,39 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\SeriesFormatType;
-use App\Enums\WatchCondition;
-use App\Enums\WorkType;
+use App\Http\Requests\AnimeTitle\IndexAnimeTitleRequest;
+use App\Http\Requests\AnimeTitle\StoreAnimeTitleRequest;
+use App\Http\Requests\AnimeTitle\UpdateAnimeTitleRequest;
 use App\Models\AnimeTitle;
-use App\Models\Series;
-use App\Models\Platform;
-use App\Models\SeriesPlatformAvailability;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Services\AnimeTitleService;
 
 class AnimeTitleController extends Controller
 {
-    public function index(Request $request)
-    {
-        $keyword = $request->input('keyword');
-        $workTypes = $request->input('work_types', WorkType::values());
+    public function __construct(
+        private readonly AnimeTitleService $animeTitleService
+    ) {}
 
-        $titles = AnimeTitle::search($keyword)
-            ->ofWorkType($workTypes)
-            ->orderBy('id')
-            ->paginate(20);
+    public function index(IndexAnimeTitleRequest $request)
+    {
+        $keyword = $request->getKeyword();
+        $workTypes = $request->getWorkTypes();
+
+        $titles = $this->animeTitleService->getAnimeTitles($keyword, $workTypes);
 
         return view('works.index', compact('titles', 'keyword', 'workTypes'));
     }
 
     public function show(AnimeTitle $animeTitle)
     {
-        $animeTitle->load([
-            'series' => function ($q) {
-                $q->orderBy('series_order');
-            },
-            'series.episodes' => function ($q) {
-                $q->orderBy('episode_no');
-            },
-            'series.platforms' => function ($q) {
-                $q->orderBy('sort_order');
-            },
-        ]);
+        $animeTitle = $this->animeTitleService->getAnimeTitleDetail($animeTitle);
 
         return view('works.show', compact('animeTitle'));
     }
 
     public function create()
     {
-        $platforms = Platform::where('is_active', true)->orderBy('sort_order')->get();
+        $platforms = $this->animeTitleService->getActivePlatforms();
+
         return view('works.form', [
             'animeTitle' => new AnimeTitle(),
             'platforms' => $platforms,
@@ -54,39 +42,13 @@ class AnimeTitleController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreAnimeTitleRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'title_kana' => 'nullable|string|max:255',
-            'work_type' => 'required|in:' . implode(',', WorkType::values()),
-            'note' => 'nullable|string',
-            'platforms' => 'nullable|array',
-            'platforms.*' => 'exists:platforms,id',
-        ]);
-
-        DB::transaction(function () use ($validated, $request) {
-            $animeTitle = AnimeTitle::create($validated);
-
-            // デフォルトのシリーズを1つ作成
-            $series = $animeTitle->series()->create([
-                'name' => 'シーズン1',
-                'series_order' => 1,
-                'format_type' => $validated['work_type'] == WorkType::MOVIE_ONLY->value
-                    ? SeriesFormatType::MOVIE->value
-                    : SeriesFormatType::SERIES->value,
-            ]);
-
-            // プラットフォーム紐付け
-            $platformIds = $request->input('platforms', []);
-            foreach ($platformIds as $platformId) {
-                SeriesPlatformAvailability::create([
-                    'series_id' => $series->id,
-                    'platform_id' => $platformId,
-                    'watch_condition' => WatchCondition::SUBSCRIPTION->value,
-                ]);
-            }
-        });
+        $this->animeTitleService->createAnimeTitle(
+            $request->validated(),
+            $request->file('image'),
+            $request->getPlatformIds()
+        );
 
         return redirect()->route('works.index')
             ->with('success', '作品を追加しました。');
@@ -94,46 +56,20 @@ class AnimeTitleController extends Controller
 
     public function edit(AnimeTitle $animeTitle)
     {
-        $platforms = Platform::where('is_active', true)->orderBy('sort_order')->get();
+        $animeTitle = $this->animeTitleService->getAnimeTitleDetail($animeTitle);
+        $animeTitle->load(['series.arcs', 'series.seriesPlatformAvailabilities']);
+        $platforms = $this->animeTitleService->getActivePlatforms();
 
-        // 紐付け済みプラットフォームIDを取得（全シリーズの合計）
-        $selectedPlatforms = SeriesPlatformAvailability::whereIn(
-            'series_id',
-            $animeTitle->series()->pluck('id')
-        )->pluck('platform_id')->unique()->toArray();
-
-        return view('works.form', compact('animeTitle', 'platforms', 'selectedPlatforms'));
+        return view('works.edit', compact('animeTitle', 'platforms'));
     }
 
-    public function update(Request $request, AnimeTitle $animeTitle)
+    public function update(UpdateAnimeTitleRequest $request, AnimeTitle $animeTitle)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'title_kana' => 'nullable|string|max:255',
-            'work_type' => 'required|in:' . implode(',', WorkType::values()),
-            'note' => 'nullable|string',
-            'platforms' => 'nullable|array',
-            'platforms.*' => 'exists:platforms,id',
-        ]);
-
-        DB::transaction(function () use ($validated, $request, $animeTitle) {
-            $animeTitle->update($validated);
-
-            // 全シリーズのプラットフォーム紐付けを更新
-            $seriesIds = $animeTitle->series()->pluck('id');
-            $platformIds = $request->input('platforms', []);
-
-            foreach ($seriesIds as $seriesId) {
-                SeriesPlatformAvailability::where('series_id', $seriesId)->delete();
-                foreach ($platformIds as $platformId) {
-                    SeriesPlatformAvailability::create([
-                        'series_id' => $seriesId,
-                        'platform_id' => $platformId,
-                        'watch_condition' => WatchCondition::SUBSCRIPTION->value,
-                    ]);
-                }
-            }
-        });
+        $this->animeTitleService->updateAnimeTitle(
+            $animeTitle,
+            $request->validated(),
+            $request->file('image'),
+        );
 
         return redirect()->route('works.show', $animeTitle)
             ->with('success', '作品情報を更新しました。');
@@ -141,9 +77,31 @@ class AnimeTitleController extends Controller
 
     public function destroy(AnimeTitle $animeTitle)
     {
-        $animeTitle->delete();
+        $this->animeTitleService->deleteAnimeTitle($animeTitle);
 
         return redirect()->route('works.index')
             ->with('success', '作品を削除しました。');
+    }
+
+    public function watchStatus(AnimeTitle $animeTitle)
+    {
+        // 作品とシリーズ、エピソード情報を取得
+        $animeTitle->load(['series' => function ($query) {
+            $query->orderBy('series_order');
+        }, 'series.episodes']);
+
+        // アクティブなメンバー一覧を取得
+        $members = \App\Models\Member::where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        // 各シリーズの視聴状況を取得
+        $seriesIds = $animeTitle->series->pluck('id')->toArray();
+        $watchStatuses = \App\Models\MemberSeriesStatus::whereIn('series_id', $seriesIds)
+            ->get()
+            ->groupBy('series_id');
+
+        return view('works.watch-status', compact('animeTitle', 'members', 'watchStatuses'));
     }
 }

@@ -17,6 +17,11 @@ enum WatchCondition: int
         };
     }
 
+    public function isPointRequired(): bool
+    {
+        return in_array($this, [self::POINT_PURCHASE, self::POINT_RENTAL], true);
+    }
+
     public static function values(): array
     {
         return array_column(self::cases(), 'value');

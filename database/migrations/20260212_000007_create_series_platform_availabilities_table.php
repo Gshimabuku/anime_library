@@ -15,7 +15,7 @@ return new class extends Migration
 
             $table->foreignId('platform_id')->constrained('platforms')->restrictOnDelete();
 
-            // 1:無料 2:ポイント必要 3:レンタル 4:見放題(任意)
+            // 1:見放題 2:ポイント購入 3:ポイントレンタル
             $table->unsignedTinyInteger('watch_condition')->default(1);
 
             $table->string('note', 255)->nullable();

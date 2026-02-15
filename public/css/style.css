@@ -149,6 +149,52 @@ a:hover {
     margin-top: 20px;
 }
 
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+}
+
+.table th,
+.table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+    white-space: nowrap;
+}
+
+.table td {
+    color: #333;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.table tr.clickable-row:hover {
+    background-color: #e8f4f8;
+}
+
 .data-table {
     width: 100%;
     border-collapse: collapse;
@@ -234,6 +280,16 @@ a:hover {
 
 .btn-success:hover {
     background-color: #219a52;
+    text-decoration: none;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.btn-info:hover {
+    background-color: #138496;
     text-decoration: none;
 }
 
@@ -476,7 +532,7 @@ textarea.form-control {
 
 .episode-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
     gap: 10px;
     max-height: 2000px;
     overflow: hidden;
@@ -655,6 +711,34 @@ textarea.form-control {
     pointer-events: none;
 }
 
+.platform-icon-item {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    overflow: visible;
+}
+
+.platform-icon-item.point-required::after {
+    content: 'P';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    background-color: #ff3b30;
+    color: #ffffff;
+    border: 1px solid #ffffff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    z-index: 2;
+}
+
 .platform-icons img {
     width: 48px;
     height: 48px;
@@ -751,4 +835,344 @@ textarea.form-control {
     .search-input {
         width: 100%;
     }
+
+    .edit-form-row {
+        flex-direction: column;
+    }
+
+    .series-edit-fields {
+        flex-direction: column;
+    }
+
+    .episode-edit-row {
+        flex-wrap: wrap;
+    }
+}
+
+/* ============================
+   作品編集画面
+   ============================ */
+.edit-form-container {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    max-width: 1100px;
+}
+
+.edit-section {
+    margin-bottom: 30px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.edit-section:last-of-type {
+    border-bottom: none;
+}
+
+.edit-section-title {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #3498db;
+}
+
+.edit-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.edit-section-header .edit-section-title {
+    margin-bottom: 0;
+    padding-bottom: 8px;
+}
+
+.edit-form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.edit-form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.edit-form-group.flex-1 { flex: 1; }
+.edit-form-group.flex-2 { flex: 2; }
+
+.required {
+    color: #e74c3c;
+}
+
+/* シリーズ編集ブロック */
+.series-edit-block {
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.series-edit-block.dragging {
+    opacity: 0.5;
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.series-edit-block.drag-over {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+.series-edit-header {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.series-edit-header .toggle-icon {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #3498db;
+    user-select: none;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.series-edit-header .toggle-icon:hover {
+    color: #2980b9;
+}
+
+.series-edit-block.collapsed .series-collapsible-content {
+    display: none;
+}
+
+.series-collapsible-content {
+    transition: opacity 0.3s ease-out;
+}
+
+.series-edit-fields {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+}
+
+/* ドラッグハンドル */
+.drag-handle {
+    cursor: grab;
+    font-size: 1.2rem;
+    color: #999;
+    user-select: none;
+    padding: 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+.drag-handle:hover {
+    color: #3498db;
+}
+
+.drag-handle:active {
+    cursor: grabbing;
+}
+
+.series-drag {
+    font-size: 1.4rem;
+    padding: 8px 4px;
+    align-self: center;
+}
+
+/* サブセクション */
+.subsection {
+    margin-top: 15px;
+    margin-left: 20px;
+    padding: 12px 15px;
+    background: #fff;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.subsection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.subsection-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+}
+
+/* PF編集行 */
+.platform-edit-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.platform-edit-row select {
+    flex: 1;
+}
+
+/* エピソード編集 */
+.episode-edit-header-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 4px 0;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #888;
+}
+
+.episode-edit-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 4px;
+    padding: 4px 0;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.episode-edit-row.dragging {
+    opacity: 0.5;
+    background: #e8f4f8;
+}
+
+.episode-edit-row.drag-over {
+    border-top: 2px solid #3498db;
+}
+
+.ep-col-handle { width: 28px; flex-shrink: 0; }
+.ep-col-no { width: 70px; flex-shrink: 0; }
+.ep-col-title { flex: 1; min-width: 120px; }
+.ep-col-year { width: 80px; flex-shrink: 0; }
+.ep-col-dur { width: 70px; flex-shrink: 0; }
+.ep-col-action { width: 32px; flex-shrink: 0; }
+
+/* アーク編集 */
+.arc-edit-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.arc-col-name { flex: 2; min-width: 120px; }
+.arc-col-ep { width: 80px; flex-shrink: 0; }
+.arc-separator {
+    color: #999;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* フォームコントロール小 */
+.form-control-sm {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+}
+
+/* ボタンバリエーション */
+.btn-outline {
+    background: transparent;
+    border: 1px solid #3498db;
+    color: #3498db;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: #fff;
+    text-decoration: none;
+}
+
+.btn-xs {
+    padding: 3px 8px;
+    font-size: 0.8rem;
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+/* 保存エリア */
+.edit-form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+/* ============================
+   リストコンテナ
+   ============================ */
+.list-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ============================
+   作品状態カード
+   ============================ */
+.work-status-card {
+    margin-bottom: 15px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.work-status-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.work-header {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    cursor: pointer;
+    align-items: center;
+    transition: background-color 0.2s;
+}
+
+.work-header:hover {
+    background-color: #f8f9fa;
+}
+
+.toggle-icon {
+    font-size: 1.2em;
+    color: #6c757d;
+    transition: transform 0.3s;
+    user-select: none;
+}
+
+.work-detail {
+    border-top: 1px solid #e9ecef;
 }

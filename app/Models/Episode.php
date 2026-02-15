@@ -16,14 +16,12 @@ class Episode extends Model
         'episode_title',
         'onair_date',
         'duration_min',
-        'is_movie',
     ];
 
     protected function casts(): array
     {
         return [
-            'onair_date' => 'date',
-            'is_movie' => 'boolean',
+            'onair_date' => 'integer',
         ];
     }
 

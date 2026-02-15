@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Member\StoreMemberRequest;
+use App\Http\Requests\Member\UpdateMemberRequest;
 use App\Models\Member;
+use App\Services\MemberService;
 use Illuminate\Http\Request;
 
 class MemberController extends Controller
 {
+    public function __construct(
+        private readonly MemberService $memberService
+    ) {}
+
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-
-        $members = Member::search($keyword)
-            ->orderBy('sort_order')
-            ->orderBy('id')
-            ->paginate(20);
+        $members = $this->memberService->getMembers($keyword);
 
         return view('members.index', compact('members', 'keyword'));
     }
@@ -24,22 +27,40 @@ class MemberController extends Controller
         return view('members.show', compact('member'));
     }
 
+    public function watchStatus(Member $member)
+    {
+        // 全作品を取得（シリーズ情報も含む）
+        $animeTitles = \App\Models\AnimeTitle::with(['series' => function ($query) {
+            $query->orderBy('series_order');
+        }, 'series.episodes'])
+        ->orderBy('id')
+        ->get();
+
+        // 全シリーズIDを取得
+        $allSeriesIds = [];
+        foreach ($animeTitles as $animeTitle) {
+            foreach ($animeTitle->series as $series) {
+                $allSeriesIds[] = $series->id;
+            }
+        }
+
+        // このメンバーの視聴状況を取得
+        $watchStatuses = \App\Models\MemberSeriesStatus::where('member_id', $member->id)
+            ->whereIn('series_id', $allSeriesIds)
+            ->get()
+            ->groupBy('series_id');
+
+        return view('members.watch-status', compact('member', 'animeTitles', 'watchStatuses'));
+    }
+
     public function create()
     {
         return view('members.form', ['member' => new Member()]);
     }
 
-    public function store(Request $request)
+    public function store(StoreMemberRequest $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'is_active' => 'required|boolean',
-        ]);
-
-        $maxOrder = Member::max('sort_order') ?? 0;
-        $validated['sort_order'] = $maxOrder + 1;
-
-        Member::create($validated);
+        $this->memberService->createMember($request->validated());
 
         return redirect()->route('members.index')
             ->with('success', 'メンバーを追加しました。');
@@ -50,14 +71,9 @@ class MemberController extends Controller
         return view('members.form', compact('member'));
     }
 
-    public function update(Request $request, Member $member)
+    public function update(UpdateMemberRequest $request, Member $member)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'is_active' => 'required|boolean',
-        ]);
-
-        $member->update($validated);
+        $this->memberService->updateMember($member, $request->validated());
 
         return redirect()->route('members.show', $member)
             ->with('success', 'メンバー情報を更新しました。');
@@ -65,7 +81,7 @@ class MemberController extends Controller
 
     public function destroy(Member $member)
     {
-        $member->delete();
+        $this->memberService->deleteMember($member);
 
         return redirect()->route('members.index')
             ->with('success', 'メンバーを削除しました。');

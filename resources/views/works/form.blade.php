@@ -3,10 +3,13 @@
 @section('title', ($animeTitle->exists ? '作品編集' : '作品追加') . ' - アニメ管理システム')
 
 @section('content')
+    @php
+        use App\Enums\WorkType;
+    @endphp
     <h1 class="page-title">{{ $animeTitle->exists ? '作品編集' : '作品追加' }}</h1>
 
     <div class="form-container">
-        <form method="POST" action="{{ $animeTitle->exists ? route('works.update', $animeTitle) : route('works.store') }}">
+        <form method="POST" action="{{ $animeTitle->exists ? route('works.update', $animeTitle) : route('works.store') }}" enctype="multipart/form-data">
             @csrf
             @if($animeTitle->exists)
                 @method('PUT')
@@ -25,10 +28,20 @@
             <div class="form-group">
                 <label class="form-label" for="work_type">作品タイプ <span style="color: #e74c3c;">*</span></label>
                 <select id="work_type" name="work_type" class="form-control">
-                    <option value="{{ \App\Models\AnimeTitle::WORK_TYPE_COUR_ONLY }}" {{ old('work_type', $animeTitle->work_type ?? \App\Models\AnimeTitle::WORK_TYPE_COUR_ONLY) == \App\Models\AnimeTitle::WORK_TYPE_COUR_ONLY ? 'selected' : '' }}>シリーズのみ</option>
-                    <option value="{{ \App\Models\AnimeTitle::WORK_TYPE_COUR_PLUS_MOVIE }}" {{ old('work_type', $animeTitle->work_type ?? \App\Models\AnimeTitle::WORK_TYPE_COUR_ONLY) == \App\Models\AnimeTitle::WORK_TYPE_COUR_PLUS_MOVIE ? 'selected' : '' }}>シリーズ+映画</option>
-                    <option value="{{ \App\Models\AnimeTitle::WORK_TYPE_MOVIE_ONLY }}" {{ old('work_type', $animeTitle->work_type ?? \App\Models\AnimeTitle::WORK_TYPE_COUR_ONLY) == \App\Models\AnimeTitle::WORK_TYPE_MOVIE_ONLY ? 'selected' : '' }}>映画のみ</option>
+                    <option value="{{ WorkType::SERIES_ONLY->value }}" {{ old('work_type', $animeTitle->work_type ?? WorkType::SERIES_ONLY->value) == WorkType::SERIES_ONLY->value ? 'selected' : '' }}>シリーズのみ</option>
+                    <option value="{{ WorkType::SERIES_PLUS_MOVIE->value }}" {{ old('work_type', $animeTitle->work_type ?? WorkType::SERIES_ONLY->value) == WorkType::SERIES_PLUS_MOVIE->value ? 'selected' : '' }}>シリーズ+映画</option>
+                    <option value="{{ WorkType::MOVIE_ONLY->value }}" {{ old('work_type', $animeTitle->work_type ?? WorkType::SERIES_ONLY->value) == WorkType::MOVIE_ONLY->value ? 'selected' : '' }}>映画のみ</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="image">作品画像</label>
+                <input type="file" id="image" name="image" class="form-control" accept="image/*">
+                @if($animeTitle->exists && $animeTitle->image_url)
+                    <div style="margin-top: 10px;">
+                        <img src="{{ $animeTitle->image_url }}" alt="{{ $animeTitle->title }}" style="max-width: 160px; border-radius: 6px;">
+                    </div>
+                @endif
             </div>
 
             <div class="form-group">
@@ -42,11 +55,6 @@
                         </label>
                     @endforeach
                 </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label" for="note">備考</label>
-                <textarea id="note" name="note" class="form-control" placeholder="メモや補足情報を入力">{{ old('note', $animeTitle->note) }}</textarea>
             </div>
 
             <div class="form-actions">

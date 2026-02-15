@@ -28,7 +28,6 @@ class ArcSeeder extends BaseDatabaseSeeder
             'name',
             'start_episode_no',
             'end_episode_no',
-            'arc_order',
         ];
         return $ret;
     }

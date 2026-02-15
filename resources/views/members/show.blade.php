@@ -9,6 +9,7 @@
         <div class="detail-header">
             <h2 class="detail-title">{{ $member->name }}</h2>
             <div class="detail-actions">
+                <a href="{{ route('members.watch-status', $member) }}" class="btn btn-info">視聴状況を見る</a>
                 <a href="{{ route('members.edit', $member) }}" class="btn btn-primary">編集</a>
                 <form method="POST" action="{{ route('members.destroy', $member) }}" style="display:inline;" onsubmit="return confirm('本当に削除しますか？')">
                     @csrf
