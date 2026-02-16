@@ -22,9 +22,13 @@
             <div class="edit-section">
                 <div class="edit-section-header">
                     <h2 class="edit-section-title">作品基本情報</h2>
-                    @if(!$animeTitle->exists)
-                        <button type="button" class="btn btn-csv-import btn-sm" onclick="document.getElementById('csvImportModal').style.display='flex'">📄 CSVインポート</button>
-                    @endif
+                    <div style="display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-success">保存</button>
+                        <a href="{{ $animeTitle->exists ? route('works.show', $animeTitle) : route('works.index') }}" class="btn btn-secondary">キャンセル</a>
+                        @if(!$animeTitle->exists)
+                            <button type="button" class="btn btn-csv-import btn-sm" onclick="document.getElementById('csvImportModal').style.display='flex'">📄 CSVインポート</button>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="edit-form-row">
