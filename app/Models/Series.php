@@ -28,7 +28,7 @@ class Series extends Model
 
     public function episodes(): HasMany
     {
-        return $this->hasMany(Episode::class)->orderBy('episode_no');
+        return $this->hasMany(Episode::class)->orderBy('sort_order');
     }
 
     public function arcs(): HasMany

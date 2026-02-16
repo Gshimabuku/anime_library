@@ -25,7 +25,19 @@
             @endif
             <div class="detail-info">
                 <div style="color: #999; font-size: 0.9rem; margin-bottom: 5px;">作品ID: W{{ str_pad($animeTitle->id, 3, '0', STR_PAD_LEFT) }}</div>
-                <h2 class="detail-title">{{ $animeTitle->title }}</h2>
+                <div class="detail-title-row">
+                    <h2 class="detail-title">{{ $animeTitle->title }}</h2>
+                    <div class="detail-actions">
+                        <a href="{{ route('works.watch-status', $animeTitle) }}" class="btn btn-info">視聴状況を見る</a>
+                        <a href="{{ route('works.edit', $animeTitle) }}" class="btn btn-primary">編集</a>
+                        <form method="POST" action="{{ route('works.destroy', $animeTitle) }}" style="display:inline;" onsubmit="return confirm('本当に削除しますか？')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">削除</button>
+                        </form>
+                        <a href="{{ route('works.index') }}" class="btn btn-secondary">一覧に戻る</a>
+                    </div>
+                </div>
                 @php
                     $pointRequiredPlatformIds = AnimeTitleUtil::getPointRequiredPlatformIds($animeTitle);
                     $platforms = AnimeTitleUtil::getPlatforms($animeTitle);
@@ -40,16 +52,6 @@
                         </span>
                     @endforeach
                 </div>
-            </div>
-            <div class="detail-actions">
-                <a href="{{ route('works.watch-status', $animeTitle) }}" class="btn btn-info">視聴状況を見る</a>
-                <a href="{{ route('works.edit', $animeTitle) }}" class="btn btn-primary">編集</a>
-                <form method="POST" action="{{ route('works.destroy', $animeTitle) }}" style="display:inline;" onsubmit="return confirm('本当に削除しますか？')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger">削除</button>
-                </form>
-                <a href="{{ route('works.index') }}" class="btn btn-secondary">一覧に戻る</a>
             </div>
         </div>
 
@@ -116,7 +118,9 @@
                             <div class="episode-list">
                                 @foreach($series->episodes as $episode)
                                     <div class="episode-item">
-                                        <span class="episode-number">第{{ $episode->episode_no }}話:</span>
+                                        @if($episode->episode_no)
+                                            <span class="episode-number">{{ $episode->episode_no }}</span>
+                                        @endif
                                         <span class="episode-title">{{ $episode->episode_title ?? '' }}</span>
                                         <span class="episode-duration">{{ $episode->duration_min }}分</span>
                                     </div>

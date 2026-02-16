@@ -29,12 +29,13 @@
                 <p>使用可能なカラム: <code>episode_n</code>, <code>episode_title</code>, <code>onair_date</code>, <code>duration_min</code></p>
                 <p>カラムは任意の組み合わせで指定できます（最低1つ）。</p>
                 <p><code>episode_n</code> を省略した場合、行の順番で自動的に連番（1, 2, 3...）が割り振られます。</p>
+                <p><code>episode_n</code> は自由形式です（例: 01. / 第1話 / Episode01 / Ⅰ）。</p>
 
                 <div class="csv-examples">
                     <h4>例1: エピソード番号とタイトル</h4>
                     <pre class="csv-example-code">episode_n,episode_title
-1,帰ってきた…
-2,夢はひとつ!</pre>
+第1話,帰ってきた…
+第2話,夢はひとつ!</pre>
 
                     <h4>例2: タイトルと尺</h4>
                     <pre class="csv-example-code">episode_title,duration_min
@@ -43,8 +44,8 @@
 
                     <h4>例3: 全カラム指定</h4>
                     <pre class="csv-example-code">episode_n,episode_title,onair_date,duration_min
-1,帰ってきた…,2025,24
-2,夢はひとつ!,2025,24</pre>
+第1話,帰ってきた…,2025,24
+第2話,夢はひとつ!,2025,24</pre>
                 </div>
             </div>
 

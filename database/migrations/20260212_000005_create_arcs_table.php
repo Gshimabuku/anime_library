@@ -14,8 +14,8 @@ return new class extends Migration
             $table->foreignId('series_id')->constrained('series')->cascadeOnDelete();
 
             $table->string('name', 255); // 例: 幼少編
-            $table->unsignedInteger('start_episode_no');
-            $table->unsignedInteger('end_episode_no');
+            $table->string('start_episode_no', 20);
+            $table->string('end_episode_no', 20);
 
             $table->timestamps();
 

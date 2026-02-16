@@ -64,9 +64,10 @@ class EpisodeServiceImpl implements EpisodeService
             foreach ($episodes as $index => $episodeData) {
                 // episode_nが指定されていない場合、連番を自動付与
                 if (!isset($episodeData['episode_no'])) {
-                    $episodeData['episode_no'] = $index + 1;
+                    $episodeData['episode_no'] = '第' . ($index + 1) . '話';
                 }
                 $episodeData['series_id'] = $series->id;
+                $episodeData['sort_order'] = $index + 1;
 
                 Episode::create($episodeData);
                 $count++;
@@ -119,12 +120,17 @@ class EpisodeServiceImpl implements EpisodeService
 
         if (isset($row['episode_n'])) {
             $value = $row['episode_n'];
-            if (!is_numeric($value) || (int) $value < 1) {
+            if (mb_strlen($value) === 0) {
                 throw new \InvalidArgumentException(
-                    "CSVの{$rowNumber}行目: episode_nは1以上の整数を指定してください。（値: {$value}）"
+                    "CSVの{$rowNumber}行目: episode_nは空にできません。"
                 );
             }
-            $data['episode_no'] = (int) $value;
+            if (mb_strlen($value) > 20) {
+                throw new \InvalidArgumentException(
+                    "CSVの{$rowNumber}行目: episode_nは20文字以内で指定してください。（値: {$value}）"
+                );
+            }
+            $data['episode_no'] = $value;
         }
 
         if (isset($row['episode_title'])) {

@@ -125,7 +125,7 @@
                                 <div class="list-thumbnail-placeholder">No Image</div>
                             @endif
                         </td>
-                        <td>{{ $title->title }}</td>
+                        <td><div class="title-truncate" title="{{ $title->title }}">{{ $title->title }}</div></td>
                         <td>
                             @php
                                 $seriesCount = AnimeTitleUtil::getSeriesCount($title);
@@ -161,7 +161,7 @@
                                 $titlePlatforms = AnimeTitleUtil::getPlatforms($title);
                             @endphp
                             <div class="platform-icons">
-                                @foreach($titlePlatforms as $platform)
+                                @foreach($titlePlatforms->take(4) as $platform)
                                     @php $iconFile = PlatformUtil::getIconFile($platform->name); @endphp
                                     <span class="platform-icon-item{{ in_array($platform->id, $pointRequiredPlatformIds, true) ? ' point-required' : '' }}">
                                         @if($iconFile)
@@ -169,6 +169,11 @@
                                         @endif
                                     </span>
                                 @endforeach
+                                @if($titlePlatforms->count() > 4)
+                                    <span class="platform-more-badge" title="{{ $titlePlatforms->skip(4)->pluck('name')->implode(', ') }}">
+                                        +{{ $titlePlatforms->count() - 4 }}
+                                    </span>
+                                @endif
                             </div>
                         </td>
                     </tr>

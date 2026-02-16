@@ -16,6 +16,7 @@ class Episode extends Model
         'episode_title',
         'onair_date',
         'duration_min',
+        'sort_order',
     ];
 
     protected function casts(): array

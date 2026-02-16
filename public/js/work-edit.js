@@ -168,13 +168,14 @@ function addEpisode(btn, seriesIndex) {
         `);
     }
 
-    // 次の話数を自動算出
+    // 次の話数を自動算出（数値として解釈可能な場合のみ連番）
     const rows = list.querySelectorAll('.episode-edit-row');
-    let nextNo = 1;
+    let nextNo = '1';
     if (rows.length > 0) {
         const lastInput = rows[rows.length - 1].querySelector('.episode-no-input');
         if (lastInput && lastInput.value) {
-            nextNo = parseInt(lastInput.value) + 1;
+            const parsed = parseInt(lastInput.value);
+            nextNo = isNaN(parsed) ? '' : String(parsed + 1);
         }
     }
 
@@ -182,8 +183,8 @@ function addEpisode(btn, seriesIndex) {
         <div class="episode-edit-row" draggable="true">
             <input type="hidden" name="series[${seriesIndex}][episodes][${idx}][id]" value="">
             <span class="drag-handle episode-drag" title="ドラッグして並び替え">☰</span>
-            <input type="number" name="series[${seriesIndex}][episodes][${idx}][episode_no]" class="form-control form-control-sm ep-col-no episode-no-input"
-                   value="${nextNo}" min="1">
+            <input type="text" name="series[${seriesIndex}][episodes][${idx}][episode_no]" class="form-control form-control-sm ep-col-no episode-no-input"
+                   value="${nextNo}" maxlength="20">
             <input type="text" name="series[${seriesIndex}][episodes][${idx}][episode_title]" class="form-control form-control-sm ep-col-title"
                    placeholder="サブタイトル">
             <input type="number" name="series[${seriesIndex}][episodes][${idx}][onair_date]" class="form-control form-control-sm ep-col-year"
@@ -243,11 +244,11 @@ function addArc(btn, seriesIndex) {
             <input type="hidden" name="series[${seriesIndex}][arcs][${idx}][id]" value="">
             <input type="text" name="series[${seriesIndex}][arcs][${idx}][name]" class="form-control form-control-sm arc-col-name"
                    placeholder="アーク名">
-            <input type="number" name="series[${seriesIndex}][arcs][${idx}][start_episode_no]" class="form-control form-control-sm arc-col-ep"
-                   placeholder="開始" min="1">
+            <input type="text" name="series[${seriesIndex}][arcs][${idx}][start_episode_no]" class="form-control form-control-sm arc-col-ep"
+                   placeholder="開始" maxlength="20">
             <span class="arc-separator">〜</span>
-            <input type="number" name="series[${seriesIndex}][arcs][${idx}][end_episode_no]" class="form-control form-control-sm arc-col-ep"
-                   placeholder="終了" min="1">
+            <input type="text" name="series[${seriesIndex}][arcs][${idx}][end_episode_no]" class="form-control form-control-sm arc-col-ep"
+                   placeholder="終了" maxlength="20">
             <button type="button" class="btn btn-danger btn-xs btn-icon" onclick="removeArc(this)">✕</button>
         </div>
     `;

@@ -21,6 +21,7 @@ class UpdateAnimeTitleRequest extends FormRequest
             'title' => 'required|string|max:255',
             'title_kana' => 'nullable|string|max:255',
             'image' => 'nullable|image|max:5120',
+            'delete_image' => 'nullable|boolean',
 
             // シリーズ
             'series' => 'nullable|array',
@@ -37,7 +38,7 @@ class UpdateAnimeTitleRequest extends FormRequest
             // エピソード
             'series.*.episodes' => 'nullable|array',
             'series.*.episodes.*.id' => 'nullable|integer|exists:episodes,id',
-            'series.*.episodes.*.episode_no' => 'required|integer|min:1',
+            'series.*.episodes.*.episode_no' => 'nullable|string|max:20',
             'series.*.episodes.*.episode_title' => 'nullable|string|max:255',
             'series.*.episodes.*.onair_date' => 'nullable|integer',
             'series.*.episodes.*.duration_min' => 'required|integer|min:1',
@@ -46,8 +47,8 @@ class UpdateAnimeTitleRequest extends FormRequest
             'series.*.arcs' => 'nullable|array',
             'series.*.arcs.*.id' => 'nullable|integer|exists:arcs,id',
             'series.*.arcs.*.name' => 'required|string|max:255',
-            'series.*.arcs.*.start_episode_no' => 'required|integer|min:1',
-            'series.*.arcs.*.end_episode_no' => 'required|integer|min:1',
+            'series.*.arcs.*.start_episode_no' => 'required|string|max:20',
+            'series.*.arcs.*.end_episode_no' => 'required|string|max:20',
 
             // 削除対象ID
             'deleted_series_ids' => 'nullable|array',

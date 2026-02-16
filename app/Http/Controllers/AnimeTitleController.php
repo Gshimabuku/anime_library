@@ -66,6 +66,7 @@ class AnimeTitleController extends Controller
             $animeTitle,
             $request->validated(),
             $request->file('image'),
+            (bool) $request->input('delete_image'),
         );
 
         return redirect()->route('works.show', $animeTitle)

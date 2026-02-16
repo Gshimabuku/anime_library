@@ -110,7 +110,7 @@ class AnimeTitleServiceImpl implements AnimeTitleService
                 $q->orderBy('series_order');
             },
             'series.episodes' => function ($q) {
-                $q->orderBy('episode_no');
+                $q->orderBy('sort_order');
             },
             'series.platforms' => function ($q) {
                 $q->orderBy('sort_order');
@@ -178,11 +178,23 @@ class AnimeTitleServiceImpl implements AnimeTitleService
     /**
      * {@inheritdoc}
      */
-    public function updateAnimeTitle(AnimeTitle $animeTitle, array $data, ?UploadedFile $image): AnimeTitle
+    public function updateAnimeTitle(AnimeTitle $animeTitle, array $data, ?UploadedFile $image, bool $deleteImage = false): AnimeTitle
     {
-        $uploadedImageUrl = CloudinaryUtil::uploadImage($image);
-        if ($uploadedImageUrl !== null) {
-            $data['image_url'] = $uploadedImageUrl;
+        $oldImageUrl = $animeTitle->image_url;
+
+        if ($deleteImage && !$image) {
+            // 画像削除のみ（新しい画像なし）
+            CloudinaryUtil::deleteImage($oldImageUrl);
+            $data['image_url'] = null;
+        } elseif ($image) {
+            // 新しい画像をアップロード（既存画像があればCloudinaryから削除）
+            $uploadedImageUrl = CloudinaryUtil::uploadImage($image);
+            if ($uploadedImageUrl !== null) {
+                if ($oldImageUrl) {
+                    CloudinaryUtil::deleteImage($oldImageUrl);
+                }
+                $data['image_url'] = $uploadedImageUrl;
+            }
         }
 
         DB::transaction(function () use ($data, $animeTitle) {
@@ -190,7 +202,7 @@ class AnimeTitleServiceImpl implements AnimeTitleService
             $animeTitle->update([
                 'title' => $data['title'],
                 'title_kana' => $data['title_kana'] ?? null,
-                'image_url' => $data['image_url'] ?? $animeTitle->image_url,
+                'image_url' => array_key_exists('image_url', $data) ? $data['image_url'] : $animeTitle->image_url,
             ]);
 
             // 削除対象の処理
@@ -276,7 +288,7 @@ class AnimeTitleServiceImpl implements AnimeTitleService
      */
     private function syncSeriesEpisodes(int $seriesId, array $episodesData): void
     {
-        foreach ($episodesData as $epData) {
+        foreach ($episodesData as $sortOrder => $epData) {
             $episodeId = $epData['id'] ?? null;
 
             $attributes = [
@@ -285,6 +297,7 @@ class AnimeTitleServiceImpl implements AnimeTitleService
                 'episode_title' => $epData['episode_title'] ?? null,
                 'onair_date' => $epData['onair_date'] ?? null,
                 'duration_min' => $epData['duration_min'],
+                'sort_order' => $sortOrder + 1,
             ];
 
             if ($episodeId) {
@@ -360,6 +373,11 @@ class AnimeTitleServiceImpl implements AnimeTitleService
 
     public function deleteAnimeTitle(AnimeTitle $animeTitle): void
     {
+        // Cloudinaryから画像を削除
+        if ($animeTitle->image_url) {
+            CloudinaryUtil::deleteImage($animeTitle->image_url);
+        }
+
         $animeTitle->delete();
     }
 
@@ -404,10 +422,11 @@ class AnimeTitleServiceImpl implements AnimeTitleService
                 foreach ($seriesData['episodes'] as $index => $epData) {
                     Episode::create([
                         'series_id' => $series->id,
-                        'episode_no' => $epData['episode_no'] ?? ($index + 1),
+                        'episode_no' => $epData['episode_no'] ?? (string) ($index + 1),
                         'episode_title' => $epData['episode_title'] ?? null,
                         'onair_date' => $epData['onair_date'] ?? null,
                         'duration_min' => $epData['duration_min'] ?? null,
+                        'sort_order' => $index + 1,
                     ]);
                 }
 

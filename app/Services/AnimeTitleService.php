@@ -37,7 +37,7 @@ interface AnimeTitleService
     /**
      * 作品情報を更新する（シリーズ・エピソード・アーク含む）
      */
-    public function updateAnimeTitle(AnimeTitle $animeTitle, array $data, ?UploadedFile $image): AnimeTitle;
+    public function updateAnimeTitle(AnimeTitle $animeTitle, array $data, ?UploadedFile $image, bool $deleteImage = false): AnimeTitle;
 
     /**
      * 作品を削除する

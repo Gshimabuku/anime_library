@@ -35,7 +35,7 @@ class StoreAnimeTitleRequest extends FormRequest
 
             // エピソード
             'series.*.episodes' => 'nullable|array',
-            'series.*.episodes.*.episode_no' => 'required|integer|min:1',
+            'series.*.episodes.*.episode_no' => 'nullable|string|max:20',
             'series.*.episodes.*.episode_title' => 'nullable|string|max:255',
             'series.*.episodes.*.onair_date' => 'nullable|integer',
             'series.*.episodes.*.duration_min' => 'required|integer|min:1',
@@ -43,8 +43,8 @@ class StoreAnimeTitleRequest extends FormRequest
             // アーク
             'series.*.arcs' => 'nullable|array',
             'series.*.arcs.*.name' => 'required|string|max:255',
-            'series.*.arcs.*.start_episode_no' => 'required|integer|min:1',
-            'series.*.arcs.*.end_episode_no' => 'required|integer|min:1',
+            'series.*.arcs.*.start_episode_no' => 'required|string|max:20',
+            'series.*.arcs.*.end_episode_no' => 'required|string|max:20',
         ];
     }
 

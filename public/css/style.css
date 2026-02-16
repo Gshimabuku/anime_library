@@ -392,9 +392,9 @@ textarea.form-control {
 .detail-actions {
     display: flex;
     gap: 10px;
-    position: absolute;
-    top: 0;
-    right: 0;
+    flex-shrink: 0;
+    margin-left: auto;
+    align-self: flex-start;
 }
 
 .detail-title-section {
@@ -408,11 +408,30 @@ textarea.form-control {
     font-size: 1.5rem;
     color: #2c3e50;
     margin: 0;
+    word-break: break-word;
 }
 
-.detail-actions {
+.detail-title-row {
     display: flex;
-    gap: 10px;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.detail-title-row .detail-title {
+    flex: 1;
+    min-width: 0;
+}
+
+.detail-title-row .detail-actions {
+    flex-shrink: 0;
+}
+
+.title-truncate {
+    max-width: 300px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .detail-row {
@@ -752,6 +771,23 @@ textarea.form-control {
     transform: scale(1.15);
 }
 
+.platform-more-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    border-radius: 6px;
+    background-color: #6c757d;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    pointer-events: auto;
+    cursor: default;
+}
+
 /* ============================
    ユーティリティ
    ============================ */
@@ -810,7 +846,6 @@ textarea.form-control {
     }
 
     .detail-actions {
-        position: static;
         width: 100%;
         flex-wrap: wrap;
     }

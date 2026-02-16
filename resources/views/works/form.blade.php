@@ -47,9 +47,34 @@
                         <label class="form-label" for="image">作品画像</label>
                         <input type="file" id="image" name="image" class="form-control" accept="image/*">
                         @if($animeTitle->exists && $animeTitle->image_url)
-                            <div style="margin-top: 8px;">
+                            <div class="image-preview-block" id="imagePreviewBlock" style="margin-top: 8px;">
                                 <img src="{{ $animeTitle->image_url }}" alt="{{ $animeTitle->title }}" style="max-width: 120px; border-radius: 6px;">
+                                <label class="image-delete-label" style="margin-top: 6px; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="checkbox" name="delete_image" value="1" id="deleteImageCheckbox">
+                                    <span style="color: #e74c3c; font-size: 0.85rem;">画像を削除する</span>
+                                </label>
                             </div>
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function () {
+                                    const deleteCheckbox = document.getElementById('deleteImageCheckbox');
+                                    const imageInput = document.getElementById('image');
+                                    if (deleteCheckbox && imageInput) {
+                                        deleteCheckbox.addEventListener('change', function () {
+                                            if (this.checked) {
+                                                imageInput.value = '';
+                                                imageInput.disabled = true;
+                                            } else {
+                                                imageInput.disabled = false;
+                                            }
+                                        });
+                                        imageInput.addEventListener('change', function () {
+                                            if (this.files.length > 0) {
+                                                deleteCheckbox.checked = false;
+                                            }
+                                        });
+                                    }
+                                });
+                            </script>
                         @endif
                     </div>
                 </div>
@@ -154,8 +179,8 @@
                                         <div class="episode-edit-row" draggable="true">
                                             <input type="hidden" name="series[{{ $sIndex }}][episodes][{{ $eIndex }}][id]" value="{{ $episode->id }}">
                                             <span class="drag-handle episode-drag" title="ドラッグして並び替え">☰</span>
-                                            <input type="number" name="series[{{ $sIndex }}][episodes][{{ $eIndex }}][episode_no]" class="form-control form-control-sm ep-col-no episode-no-input"
-                                                   value="{{ old("series.{$sIndex}.episodes.{$eIndex}.episode_no", $episode->episode_no) }}" min="1">
+                                            <input type="text" name="series[{{ $sIndex }}][episodes][{{ $eIndex }}][episode_no]" class="form-control form-control-sm ep-col-no episode-no-input"
+                                                   value="{{ old("series.{$sIndex}.episodes.{$eIndex}.episode_no", $episode->episode_no) }}" maxlength="20">
                                             <input type="text" name="series[{{ $sIndex }}][episodes][{{ $eIndex }}][episode_title]" class="form-control form-control-sm ep-col-title"
                                                    value="{{ old("series.{$sIndex}.episodes.{$eIndex}.episode_title", $episode->episode_title) }}" placeholder="サブタイトル">
                                             <input type="number" name="series[{{ $sIndex }}][episodes][{{ $eIndex }}][onair_date]" class="form-control form-control-sm ep-col-year"
@@ -180,11 +205,11 @@
                                             <input type="hidden" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][id]" value="{{ $arc->id }}">
                                             <input type="text" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][name]" class="form-control form-control-sm arc-col-name"
                                                    value="{{ old("series.{$sIndex}.arcs.{$aIndex}.name", $arc->name) }}" placeholder="アーク名">
-                                            <input type="number" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][start_episode_no]" class="form-control form-control-sm arc-col-ep"
-                                                   value="{{ old("series.{$sIndex}.arcs.{$aIndex}.start_episode_no", $arc->start_episode_no) }}" placeholder="開始" min="1">
+                                            <input type="text" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][start_episode_no]" class="form-control form-control-sm arc-col-ep"
+                                                   value="{{ old("series.{$sIndex}.arcs.{$aIndex}.start_episode_no", $arc->start_episode_no) }}" placeholder="開始" maxlength="20">
                                             <span class="arc-separator">〜</span>
-                                            <input type="number" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][end_episode_no]" class="form-control form-control-sm arc-col-ep"
-                                                   value="{{ old("series.{$sIndex}.arcs.{$aIndex}.end_episode_no", $arc->end_episode_no) }}" placeholder="終了" min="1">
+                                            <input type="text" name="series[{{ $sIndex }}][arcs][{{ $aIndex }}][end_episode_no]" class="form-control form-control-sm arc-col-ep"
+                                                   value="{{ old("series.{$sIndex}.arcs.{$aIndex}.end_episode_no", $arc->end_episode_no) }}" placeholder="終了" maxlength="20">
                                             <button type="button" class="btn btn-danger btn-xs btn-icon" onclick="removeArc(this)">✕</button>
                                         </div>
                                     @endforeach
@@ -387,18 +412,19 @@ NARUTO,なると</pre>
                     <p>1行目: <code>シリーズ名,フォーマット</code>（シリーズ / スペシャル / 映画）</p>
                     <p>2行目: エピソードのヘッダー行（<code>episode_n</code>, <code>episode_title</code>, <code>onair_date</code>, <code>duration_min</code> の組み合わせ）</p>
                     <p>3行目以降: エピソードデータ</p>
+                    <p><code>episode_n</code> は自由形式です（例: 01. / 第1話 / Episode01 / Ⅰ）。</p>
 
                     <div class="csv-examples">
                         <h4>例1: 話数＋サブタイトル</h4>
                         <pre class="csv-example-code">第1シリーズ,シリーズ
 episode_n,episode_title
-1,帰ってきた…
-2,夢はひとつ
+第1話,帰ってきた…
+第2話,夢はひとつ
 
 第2シリーズ,シリーズ
 episode_n,episode_title
-1,新たな冒険
-2,出発の朝</pre>
+第1話,新たな冒険
+第2話,出発の朝</pre>
 
                         <h4>例2: サブタイトル＋尺</h4>
                         <pre class="csv-example-code">第1シリーズ,シリーズ
@@ -563,7 +589,7 @@ episode_title,duration_min
                     const ep = {};
                     headers.forEach((h, idx) => {
                         if (h === 'episode_n') {
-                            ep['episode_no'] = parseInt(values[idx]) || (episodes.length + 1);
+                            ep['episode_no'] = values[idx] || String(episodes.length + 1);
                         } else if (h === 'duration_min') {
                             ep['duration_min'] = parseInt(values[idx]) || null;
                         } else if (h === 'onair_date') {
@@ -574,7 +600,7 @@ episode_title,duration_min
                     });
                     // episode_noがなければ連番
                     if (!ep.hasOwnProperty('episode_no')) {
-                        ep['episode_no'] = episodes.length + 1;
+                        ep['episode_no'] = String(episodes.length + 1);
                     }
                     episodes.push(ep);
                 }
